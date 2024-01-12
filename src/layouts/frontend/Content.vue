@@ -1,5 +1,5 @@
 <template>
-    <Slider />
+    <TheSlider />
     <section>
         <div class="container">
             <div class="row">
@@ -732,5 +732,5 @@
 </template>
 
 <script setup>
-import Slider from '../../components/frontend/Slider.vue';
+import TheSlider from '../../components/frontend/TheSlider.vue';
 </script>

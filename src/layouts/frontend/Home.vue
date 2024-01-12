@@ -9,10 +9,9 @@ import { defineComponent } from "vue";
 import { onMounted } from 'vue';
 import TheHeader from "@/components/frontend/TheHeader.vue";
 import TheFooter from "@/components/frontend/TheFooter.vue";
-import Slider from "@/components/frontend/Slider.vue";
 
 export default defineComponent({
-    components: { TheHeader, TheFooter, Slider },
+    components: { TheHeader, TheFooter },
     setup() {
         // Dữ liệu động
         const dynamicCssPath = [
@@ -38,7 +37,7 @@ export default defineComponent({
         // const viewport = 'width=device-width, initial-scale=1.0';
 
         const scriptTag = [
-            '/src/assets/frontend/js/jquery.js',
+            // '/src/assets/frontend/js/jquery.js',
             '/src/assets/frontend/js/price-range.js',
             '/src/assets/frontend/js/jquery.scrollUp.min.js',
             '/src/assets/frontend/js/bootstrap.min.js',
