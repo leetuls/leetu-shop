@@ -19,7 +19,7 @@ import { RouterLink } from 'vue-router';
                             <li class="dropdown"><a href="#" id="shopTag">Shop<i class="fa fa-angle-down"></i></a>
                                 <ul role="menu" class="sub-menu">
                                     <li><a href="/shop">Products</a></li>
-                                    <li><a href="product-details.html">Product Details</a></li>
+                                    <li><a href="/product-details">Product Details</a></li>
                                     <li><a href="checkout.html">Checkout</a></li>
                                     <li><a href="cart.html">Cart</a></li>
                                     <li><a href="login.html">Login</a></li>

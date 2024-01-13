@@ -316,6 +316,13 @@
 </template>
 
 <script setup>
-import TheSidebar from '@/components/frontend/TheSidebar.vue';
-import ProductDetails from '@/components/frontend/ProductDetails.vue';
+import { onMounted } from 'vue';
+import TheSidebar from '@/components/frontend/Common/TheSidebar.vue';
+import ProductDetails from '@/components/frontend/Product/ProductDetails.vue';
+import { Common } from '../../utils/common';
+onMounted(() => {
+    Common.removeMenuColor();
+    Common.changeColorById('shopTag');
+    Common.changeColorClick('Product Details');
+});
 </script>

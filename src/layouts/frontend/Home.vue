@@ -5,8 +5,7 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
-import { onMounted } from 'vue';
+import { defineComponent, onMounted } from "vue";
 import TheHeader from "@/components/frontend/Common/TheHeader.vue";
 import TheFooter from "@/components/frontend/Common/TheFooter.vue";
 
