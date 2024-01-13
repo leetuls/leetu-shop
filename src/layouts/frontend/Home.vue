@@ -7,8 +7,8 @@
 <script>
 import { defineComponent } from "vue";
 import { onMounted } from 'vue';
-import TheHeader from "@/components/frontend/TheHeader.vue";
-import TheFooter from "@/components/frontend/TheFooter.vue";
+import TheHeader from "@/components/frontend/Common/TheHeader.vue";
+import TheFooter from "@/components/frontend/Common/TheFooter.vue";
 
 export default defineComponent({
     components: { TheHeader, TheFooter },

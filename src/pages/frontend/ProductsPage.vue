@@ -24,8 +24,8 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import TheSidebar from '@/components/frontend/thesidebar.vue';
-import FeaturesItems from '@/components/frontend/FeaturesItems.vue';
+import TheSidebar from '@/components/frontend/Common/TheSidebar.vue';
+import FeaturesItems from '@/components/frontend/Product/FeaturesItems.vue';
 import { Common } from '../../utils/common';
 
 onMounted(() => {

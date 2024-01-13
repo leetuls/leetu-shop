@@ -1,6 +1,6 @@
 import Content from '../../layouts/frontend/Content.vue';
-import Login from '@/pages/frontend/Login.vue';
-import Products from '@/pages/frontend/Products.vue';
+import LoginPage from '@/pages/frontend/LoginPage.vue';
+import ProductsPage from '@/pages/frontend/ProductsPage.vue';
 
 const home = [
     {
@@ -11,12 +11,12 @@ const home = [
     {
         path: "/login",
         name: 'login-page',
-        component: Login,
+        component: LoginPage,
     },
     {
         path: "/shop",
         name: 'products-page',
-        component: Products,
+        component: ProductsPage,
     }
 ];
 

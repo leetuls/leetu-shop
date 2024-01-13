@@ -15,9 +15,9 @@
 </template>
 
 <script setup>
-import TheSlider from '@/components/frontend/TheSlider.vue';
-import TheSidebar from '@/components/frontend/TheSidebar.vue';
-import FeaturesItems from '@/components/frontend/FeaturesItems.vue';
-import CategoryTab from '@/components/frontend/CategoryTab.vue';
-import RecommendedItems from '@/components/frontend/RecommendedItems.vue';
+import TheSlider from '@/components/frontend/Common/TheSlider.vue';
+import TheSidebar from '@/components/frontend/Common/TheSidebar.vue';
+import FeaturesItems from '@/components/frontend/Product/FeaturesItems.vue';
+import CategoryTab from '@/components/frontend/CategoryTab/CategoryTab.vue';
+import RecommendedItems from '@/components/frontend/Product/RecommendedItems.vue';
 </script>
