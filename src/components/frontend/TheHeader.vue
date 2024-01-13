@@ -66,8 +66,7 @@
                                 <li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>&nbsp;
                                 <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>&nbsp;
                                 <li><a href="cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>&nbsp;
-                                <li><router-link to="/login" id="loginTag" @click="changeClick" tag="a"><i
-                                            class="fa fa-lock"></i>
+                                <li><router-link to="/login" id="loginTag" tag="a"><i class="fa fa-lock"></i>
                                         Login</router-link></li>
                             </ul>
                         </div>
@@ -87,13 +86,6 @@ import { defineComponent } from "vue";
 import TheMenu from "./TheMenu.vue";
 
 export default defineComponent({
-    components: { TheMenu },
-    setup() {
-        const changeClick = () => {
-            document.getElementById('loginTag').setAttribute('style', 'color:#fdb45e; background: none;');
-        }
-
-        return { changeClick }
-    }
+    components: { TheMenu }
 });
 </script>

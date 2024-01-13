@@ -34,3 +34,13 @@
         </div>
     </section><!--/form-->
 </template>
+
+<script setup>
+import { Common } from '../../utils/common';
+import { onMounted } from 'vue';
+
+onMounted(() => {
+    Common.removeMenuColor();
+    Common.changeColorById('loginTag');
+});
+</script>
