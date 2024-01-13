@@ -13,7 +13,7 @@ import TheFooter from "@/components/frontend/TheFooter.vue";
 export default defineComponent({
     components: { TheHeader, TheFooter },
     setup() {
-        // Dữ liệu động
+        // dynamic data
         const dynamicCssPath = [
             '/src/assets/frontend/css/bootstrap.min.css',
             '/src/assets/frontend/css/font-awesome.min.css',
@@ -34,10 +34,8 @@ export default defineComponent({
 
         const appleTouchIcon = '/src/assets/frontend/images/ico/apple-touch-icon-57-precomposed.png';
 
-        // const viewport = 'width=device-width, initial-scale=1.0';
-
         const scriptTag = [
-            // '/src/assets/frontend/js/jquery.js',
+            '/src/assets/frontend/js/jquery.js',
             '/src/assets/frontend/js/price-range.js',
             '/src/assets/frontend/js/jquery.scrollUp.min.js',
             '/src/assets/frontend/js/bootstrap.min.js',
@@ -45,7 +43,7 @@ export default defineComponent({
             '/src/assets/frontend/js/main.js'
         ];
 
-        // Thêm CSS động vào thẻ head
+        // add dynamic css to head
         const addDynamicCssToHead = () => {
             for (let path of dynamicCssPath) {
                 let linkElement = document.createElement('link');
