@@ -15,5 +15,8 @@ export const Common = {
             $(this).children('a:first').css('color', '#696763');
         });
         $('.shop-menu').find('ul').children('li').find('a').css('color', '#696763');
+    },
+    removeColorAllMenu: () => {
+        $('#ul-menu').children('li').find('a:gt(0)').css('color', '#fff');
     }
 }

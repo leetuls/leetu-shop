@@ -107,8 +107,12 @@
                             <ul class="nav navbar-nav">
                                 <li><a href="#"><i class="fa fa-user"></i> Account</a></li>&nbsp;
                                 <li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>&nbsp;
-                                <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>&nbsp;
-                                <li><a href="cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>&nbsp;
+                                <li>
+                                    <router-link to="/checkout" id="checkoutTag"><i class="fa fa-crosshairs"></i>
+                                        Checkout</router-link>
+                                </li>&nbsp;
+                                <li><router-link to="/cart" id="cartTag"><i class="fa fa-shopping-cart"></i> Cart</router-link></li>
+                                &nbsp;
                                 <li><router-link to="/login" id="loginTag" tag="a"><i class="fa fa-lock"></i>
                                         Login</router-link></li>
                             </ul>
@@ -119,9 +123,10 @@
         </div><!--/header-middle-->
         <!--header-bottom-->
         <TheMenu />
-    <!--/header-bottom-->
+        <!--/header-bottom-->
 
-</header><!--/header--></template>
+    </header><!--/header-->
+</template>
 
 <script>
 import { defineComponent } from "vue";

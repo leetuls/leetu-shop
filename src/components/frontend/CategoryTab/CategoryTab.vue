@@ -1,14 +1,6 @@
 <template>
     <div class="category-tab"><!--category-tab-->
-        <div class="col-sm-12">
-            <ul class="nav nav-tabs">
-                <li class="active"><a href="#tshirt" data-toggle="tab">T-Shirt</a></li>
-                <li><a href="#blazers" data-toggle="tab">Blazers</a></li>
-                <li><a href="#sunglass" data-toggle="tab">Sunglass</a></li>
-                <li><a href="#kids" data-toggle="tab">Kids</a></li>
-                <li><a href="#poloshirt" data-toggle="tab">Polo shirt</a></li>
-            </ul>
-        </div>
+        <NavTabs v-bind:menu-data="menuData" />
         <div class="tab-content">
             <TshirtTabContent />
             <BlazersTabContent />
@@ -20,9 +12,17 @@
 </template>
 
 <script setup>
-import TshirtTabContent from './TabContent/TshirtTabContent.vue';
-import BlazersTabContent from './TabContent/BlazersTabContent.vue';
-import SunglassTabContent from './TabContent/SunglassTabContent.vue';
-import KidsTabContent from './TabContent/KidsTabContent.vue';
-import PoloshirtTabContent from './TabContent/PoloshirtTabContent.vue';
+import TshirtTabContent from './TabContent/Home/TshirtTabContent.vue';
+import BlazersTabContent from './TabContent/Home/BlazersTabContent.vue';
+import SunglassTabContent from './TabContent/Home/SunglassTabContent.vue';
+import KidsTabContent from './TabContent/Home/KidsTabContent.vue';
+import PoloshirtTabContent from './TabContent/Home/PoloshirtTabContent.vue';
+import NavTabs from './NavTabs.vue';
+const menuData = [
+    { class: 'active', href: '#tshirt', dataToggle: 'tab', text: 'T-Shirt' },
+    { class: null, href: '#blazers', dataToggle: 'tab', text: 'Blazers' },
+    { class: null, href: '#sunglass', dataToggle: 'tab', text: 'Sunglass' },
+    { class: null, href: '#kids', dataToggle: 'tab', text: 'Kids' },
+    { class: null, href: '#poloshirt', dataToggle: 'tab', text: 'Polo shirt' },
+];
 </script>
