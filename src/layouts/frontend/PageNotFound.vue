@@ -11,3 +11,32 @@
         </div>
     </div>
 </template>
+
+<script setup>
+import { onMounted } from "vue";
+const addDynamicCssToHead = () => {
+    let dynamicCssPath = [
+        '/src/assets/frontend/css/bootstrap.min.css',
+        '/src/assets/frontend/css/main.css',
+    ];
+    for (let path of dynamicCssPath) {
+        let linkElement = document.createElement('link');
+        linkElement.setAttribute('rel', 'stylesheet');
+        linkElement.setAttribute('href', path);
+
+        // Append the <link> element to the head of the document
+        document.head.appendChild(linkElement);
+    }
+
+    let scriptTag = '/src/assets/frontend/js/main.js';
+    let linkElement1 = document.createElement('script');
+    linkElement1.setAttribute('src', scriptTag);
+
+    // Append the <link> element to the head of the document
+    document.body.appendChild(linkElement1);
+}
+
+onMounted(() => {
+    addDynamicCssToHead();
+});
+</script>

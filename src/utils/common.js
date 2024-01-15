@@ -18,5 +18,9 @@ export const Common = {
     },
     removeColorAllMenu: () => {
         $('#ul-menu').children('li').find('a:gt(0)').css('color', '#fff');
+    },
+    removeTag: () => {
+        $('link').remove();
+        $('script').remove();
     }
 }
