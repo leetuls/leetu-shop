@@ -1,10 +1,16 @@
-import Admin from '@/layouts/admin/Admin.vue';
+import DashBoard from '@/pages/admin/DashBoard.vue';
+import Login from '@/pages/admin/Login.vue';
 
 const admin = [
     {
         path: "/admin",
         name: 'admin-page',
-        component: Admin,
+        component: DashBoard,
+    },
+    {
+        path: "/login-admin",
+        name: 'login-admin-page',
+        component: Login,
     }
 ];
 

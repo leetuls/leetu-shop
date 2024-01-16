@@ -20,7 +20,7 @@ export const Common = {
         $('#ul-menu').children('li').find('a:gt(0)').css('color', '#fff');
     },
     removeTag: () => {
-        $('link').remove();
+        $('link:not(.icon)').remove();
         $('script').remove();
     }
 }
