@@ -60,6 +60,6 @@ onMounted(() => {
 
 <style scoped>
 #page-wrapper {
-    min-height: 700px;
+    min-height: 1200px;
 }
 </style>
