@@ -73,7 +73,7 @@
             </li>
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="fa fa-user fa-fw"></i> secondtruth <b class="caret"></b>
+                    <i class="fa fa-user fa-fw"></i> {{ username }} <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu dropdown-user">
                     <li>
@@ -84,7 +84,7 @@
                     </li>
                     <li class="divider"></li>
                     <li>
-                        <a href="/admin" @click="logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        <a href="#" @click="logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                     </li>
                 </ul>
             </li>
@@ -94,7 +94,22 @@
 </template>
 
 <script setup>
-const logout = () => {
-    window.sessionStorage.clear();
+import UserData from '@/utils/session-data.js';
+import { onMounted, ref } from 'vue';
+import { useAuthStore } from '@/stores/admin/auth';
+import { useCookies } from "vue3-cookies";
+
+const store = useAuthStore();
+const username = ref();
+const { cookies } = useCookies();
+
+const logout = async () => {
+    await store.logout(UserData.token);
+    cookies.set('session_data', null, 0);
+    window.location.reload();
 }
+
+onMounted(() => {
+    username.value = UserData.username;
+});
 </script>
