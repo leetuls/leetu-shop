@@ -98,12 +98,15 @@ import UserData from '@/utils/session-data.js';
 import { onMounted, ref } from 'vue';
 import { useAuthStore } from '@/stores/admin/auth';
 import { useCookies } from "vue3-cookies";
+import { Session } from '../../../stores/admin/session-timeout';
 
 const store = useAuthStore();
 const username = ref();
 const { cookies } = useCookies();
+const session = Session();
 
 const logout = async () => {
+    await session.removeEventTimeout();
     await store.logout(UserData.token);
     cookies.set('session_data', null, 0);
     window.location.reload();

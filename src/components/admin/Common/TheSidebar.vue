@@ -18,7 +18,7 @@
                     <a href="index.html" class="active"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                 </li>
                 <li>
-                    <a href="tables.html"><i class="fa fa-table fa-fw"></i> Danh mục sản phẩm</a>
+                    <RouterLink to="/admin/category-list"><i class="fa fa-table fa-fw"></i> Danh mục sản phẩm</RouterLink>
                 </li>
             </ul>
         </div>

@@ -10,10 +10,15 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import TheHeader from '@/components/admin/Common/TheHeader.vue';
 import TheSidebar from '@/components/admin/Common/TheSidebar.vue';
 import { Common } from '@/utils/common.js';
+import { Session } from "../../stores/admin/session-timeout";
+
+const session = Session();
+
+session.addEventTimeout();
 
 const addDynamicCssToHead = () => {
     let dynamicCssPath = [
@@ -55,6 +60,7 @@ onMounted(() => {
     Common.removeTag();
     addDynamicCssToHead();
     document.title = "Shop Admin";
+    session.startSessionTimeout();
 });
 </script>
 

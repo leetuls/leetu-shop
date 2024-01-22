@@ -21,7 +21,7 @@ onMounted(async () => {
   await router.isReady()
   if (['/404-page-not-found', '/404-page-not-found/'].includes(route.path)) {
     currentComponent.value = PageNotFound;
-  } else if (['/admin', '/admin/'].includes(route.path)) {
+  } else if (['/admin', '/admin/', '/admin/category-list', '/admin/category-list/'].includes(route.path)) {
     if (checkNull.includes(cookies.get('session_data'))) {
       window.location.href = '/login-admin';
       exit(0);
