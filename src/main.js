@@ -9,7 +9,7 @@ const app = createApp(App);
 
 const pinia = createPinia();
 
-pinia.use(piniaPluginPersistedState)
+pinia.use(piniaPluginPersistedState);
 
 app.use(router);
 app.use(pinia);

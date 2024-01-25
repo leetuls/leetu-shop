@@ -1,13 +1,13 @@
 <template>
     <div>
         <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
-            <a-form-item label="Category name" v-bind="validateInfos.name">
+            <a-form-item label="Tên danh mục" v-bind="validateInfos.name">
                 <a-input v-model:value="modelRef.name" />
             </a-form-item>
-            <a-form-item label="Parent category" v-bind="validateInfos.region">
-                <a-select v-model:value="modelRef.region" placeholder="please select your zone">
-                    <a-select-option value="shanghai">Zone one</a-select-option>
-                    <a-select-option value="beijing">Zone two</a-select-option>
+            <a-form-item label="Danh mục cha" v-bind="validateInfos.region">
+                <a-select v-model:value="modelRef.region" placeholder="Hãy chọn danh mục cha">
+                    <a-select-option value="shanghai">Quần áo</a-select-option>
+                    <a-select-option value="beijing">Giày dép</a-select-option>
                 </a-select>
             </a-form-item>
             <a-button style="margin-left: 10px" @click="resetFields">Reset</a-button>

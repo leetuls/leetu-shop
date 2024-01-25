@@ -1,6 +1,6 @@
 <template>
     <a-button class="editable-add-btn" @click="showModal" style="margin-bottom: 8px">Thêm</a-button>
-    <a-modal :width="800" v-model:open="open" title="Add new category" :confirm-loading="confirmLoading" @ok="handleOk">
+    <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
         <CategoryForm ref="categoryRef" />
     </a-modal>
     <a-table :columns="columns" :data-source="dataSource" bordered :pagination="{ pageSize: 7 }">
@@ -56,6 +56,7 @@
         </template>
     </a-table>
 </template>
+
 <script setup>
 import { cloneDeep } from 'lodash-es';
 import { reactive, ref, onMounted, computed } from 'vue';
