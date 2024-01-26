@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useCookies } from "vue3-cookies";
 import UserData from '@/utils/session-data.js';
+import { useAuthStore } from './auth';
 
 const { cookies } = useCookies();
 
@@ -10,7 +11,9 @@ export const Session = defineStore('session',
         state: () => ({ sessionTimeout: ref(Promise) }),
         actions: {
             startSessionTimeout() {
-                this.sessionTimeout.value = setTimeout(function () {
+                this.sessionTimeout.value = setTimeout(async function () {
+                    let store = useAuthStore();
+                    await store.logout(UserData.token);
                     cookies.set('session_data', null, 0);
                     // redirect to login page
                     window.location.href = '/login-admin';
