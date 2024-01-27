@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router/index.js'
-import { Alert, Table, Popconfirm, Button, Input, Modal, Select, Checkbox, Form } from 'ant-design-vue'
+import { Alert, Table, Popconfirm, Button, Input, Modal, Select, Checkbox, Form, Skeleton } from 'ant-design-vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedState from "pinia-plugin-persistedstate"
 
@@ -22,4 +22,5 @@ app.use(Modal);
 app.use(Select);
 app.use(Checkbox);
 app.use(Form);
+app.use(Skeleton);
 app.mount('#app');

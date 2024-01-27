@@ -3,7 +3,7 @@
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
         <CategoryForm ref="categoryRef" />
     </a-modal>
-    <a-table :columns="columns" :data-source="dataSource" bordered :pagination="{ pageSize: 7 }">
+    <a-table :columns="columns" :data-source="dataSource" bordered :pagination="{ pageSize: 7 }" :loading="isLoading">
         <!-- Search -->
         <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
             <div style="padding: 8px">
@@ -28,26 +28,35 @@
         </template>
         <!-- End Search -->
         <template #bodyCell="{ column, text, record }">
-            <template v-if="['name', 'age', 'address'].includes(column.dataIndex)">
+            <template v-if="['parent_id'].includes(column.dataIndex)">
                 <div>
-                    <a-input v-if="editableData[record.key]" v-model:value="editableData[record.key][column.dataIndex]"
-                        @keyup.enter="save(record.key)" style="margin: -5px 0" />
+                    <CategoryViewModel v-if="editableData[record.id]" :options="options"
+                        v-model:value="editableData[record.id][column.dataIndex]" @keyup.enter="save(record.id)" />
+                    <template v-else>
+                        {{ categoryCombine[text] }}
+                    </template>
+                </div>
+            </template>
+            <template v-if="['name'].includes(column.dataIndex)">
+                <div>
+                    <a-input v-if="editableData[record.id]" v-model:value="editableData[record.id][column.dataIndex]"
+                        @keyup.enter="save(record.id)" style="margin: -5px 0" />
                     <template v-else>
                         {{ text }}
                     </template>
                 </div>
             </template>
-            <template v-else-if="column.dataIndex === 'operation'">
+            <template v-if="column.dataIndex === 'operation'">
                 <div class="editable-row-operations">
-                    <span v-if="editableData[record.key]">
-                        <a-popconfirm @confirm="save(record.key)" title="Sure to edit?"><a>Save</a></a-popconfirm>
-                        <a @click="cancel(record.key)">
+                    <span v-if="editableData[record.id]">
+                        <a-popconfirm @confirm="save(record.id)" title="Sure to edit?"><a>Save</a></a-popconfirm>
+                        <a @click="cancel(record.id)">
                             <a>Cancel</a>
                         </a>
                     </span>
                     <span v-else>
-                        <a @click="edit(record.key)">Edit</a>
-                        <a-popconfirm v-if="dataSource.length" title="Sure to delete?" @confirm="onDelete(record.key)">
+                        <a @click="edit(record.id)">Edit</a>
+                        <a-popconfirm v-if="dataSource.length" title="Sure to delete?" @confirm="onDelete(record.id)">
                             <a>Delete</a>
                         </a-popconfirm>
                     </span>
@@ -59,15 +68,38 @@
 
 <script setup>
 import { cloneDeep } from 'lodash-es';
-import { reactive, ref, onMounted, computed } from 'vue';
+import { reactive, ref, onMounted, computed, onBeforeMount } from 'vue';
 import { SearchOutlined } from '@ant-design/icons-vue';
-import CategoryForm from './CategoryForm.vue';
+import CategoryForm from '@/components/admin/PageWrapper/Categories/CategoryForm.vue';
+import { categoryData } from '@/stores/admin/categories';
+import UserData from '@/utils/session-data.js';
+import CategoryViewModel from './CategoryViewModel.vue';
+
+const store = categoryData();
+const options = ref([]);
+const categoryCombine = ref([]);
 
 const columns = [
     {
+        title: 'ID',
+        dataIndex: 'id',
+        width: '10%',
+        customFilterDropdown: true,
+        onFilter: (value, record) => record.id.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownOpenChange: visible => {
+            if (visible) {
+                setTimeout(() => {
+                    searchInput.value.focus();
+                }, 100);
+            }
+        },
+        sorter: (a, b) => a.id - b.id > 0,
+        sortDirections: ['descend', 'ascend'],
+    },
+    {
         title: 'Tên Danh mục',
         dataIndex: 'name',
-        width: '25%',
+        width: '40%',
         customFilterDropdown: true,
         onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: visible => {
@@ -81,11 +113,11 @@ const columns = [
         sortDirections: ['descend', 'ascend'],
     },
     {
-        title: 'age',
-        dataIndex: 'age',
-        width: '15%',
+        title: 'Danh mục cha',
+        dataIndex: 'parent_id',
+        width: '40%',
         customFilterDropdown: true,
-        onFilter: (value, record) => record.age.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilter: (value, record) => categoryCombine.value[record.parent_id].toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: visible => {
             if (visible) {
                 setTimeout(() => {
@@ -93,41 +125,54 @@ const columns = [
                 }, 100);
             }
         },
-        sorter: (a, b) => a.age - b.age > 0,
+        sorter: (a, b) => categoryCombine.value[a.parent_id].localeCompare(categoryCombine.value[b.parent_id]),
         sortDirections: ['descend', 'ascend'],
     },
     {
-        title: 'address',
-        dataIndex: 'address',
-        width: '40%',
-    },
-    {
-        title: 'operation',
+        title: 'Thao tác',
         dataIndex: 'operation',
-    },
+    }
 ];
-const data = [];
-for (let i = 0; i < 5; i++) {
-    data.push({
-        key: i.toString(),
-        name: `Edrward ${i}`,
-        age: 32,
-        address: `London Park no. ${i}`,
-    });
+
+// fetch Data to Grid
+const isLoading = ref(false);
+const fetchData = async () => {
+    await store.getAllCategories(UserData.token);
+    let categories = [];
+    if (!store.data.error) {
+        categories = store.data.categories;
+    }
+    dataSource.value = categories;
 }
-const dataSource = ref(data);
+
+// fetch data model for select component
+const fetchDataCategoryModel = async () => {
+    await store.getViewModel(UserData.token);
+    let viewModel = [];
+    if (!store.data.error) {
+        viewModel = store.data.category_model
+        categoryCombine.value = store.data.category_combine
+        options.value = viewModel;
+    }
+}
+
+const dataSource = ref([]);
 const editableData = reactive({});
-const edit = key => {
-    editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
+
+// edit, update
+const edit = id => {
+    editableData[id] = cloneDeep(dataSource.value.filter(item => id === item.id)[0]);
 };
-const save = key => {
-    Object.assign(dataSource.value.filter(item => key === item.key)[0], editableData[key]);
-    delete editableData[key];
+
+const save = id => {
+    Object.assign(dataSource.value.filter(item => id === item.id)[0], editableData[id]);
+    delete editableData[id];
 };
 const cancel = key => {
     delete editableData[key];
 };
 
+// delete
 const onDelete = key => {
     dataSource.value = dataSource.value.filter(item => item.key !== key);
 };
@@ -192,7 +237,11 @@ const handleOk = () => {
     }, 1200);
 }
 
-onMounted(() => {
+onBeforeMount(async () => {
+    isLoading.value = true;
+    await fetchData();
+    await fetchDataCategoryModel();
+    isLoading.value = false;
     document.addEventListener('keydown', handleKeyDown);
 });
 </script>
