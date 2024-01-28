@@ -5,10 +5,7 @@
                 <a-input v-model:value="modelRef.name" />
             </a-form-item>
             <a-form-item label="Danh mục cha" v-bind="validateInfos.region">
-                <a-select v-model:value="modelRef.region" placeholder="Hãy chọn danh mục cha">
-                    <a-select-option value="shanghai">Quần áo</a-select-option>
-                    <a-select-option value="beijing">Giày dép</a-select-option>
-                </a-select>
+                <CategoryViewModel :options="options"/>
             </a-form-item>
             <a-button style="margin-left: 10px" @click="resetFields">Reset</a-button>
         </a-form>
@@ -16,9 +13,18 @@
 </template>
 
 <script setup>
-import { reactive, toRaw, defineExpose } from 'vue';
+import { reactive, toRaw, defineExpose, defineProps } from 'vue';
 import { Form } from 'ant-design-vue';
+import CategoryViewModel from './CategoryViewModel.vue';
+
 const useForm = Form.useForm;
+
+const props = defineProps(
+    {
+        'options': Array
+    }
+);
+
 const labelCol = {
     span: 4,
 };
@@ -27,8 +33,7 @@ const wrapperCol = {
 };
 const modelRef = reactive({
     name: '',
-    region: undefined,
-    type: [],
+    region: undefined
 });
 const rulesRef = reactive({
     name: [
@@ -42,14 +47,7 @@ const rulesRef = reactive({
             required: true,
             message: 'Please select region',
         },
-    ],
-    type: [
-        {
-            required: true,
-            message: 'Please select type',
-            type: 'array',
-        },
-    ],
+    ]
 });
 const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef, {
     onValidate: (...args) => console.log(...args),

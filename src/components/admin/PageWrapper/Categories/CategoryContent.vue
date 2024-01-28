@@ -1,7 +1,7 @@
 <template>
     <a-button class="editable-add-btn" @click="showModal" style="margin-bottom: 8px">Thêm</a-button>
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
-        <CategoryForm ref="categoryRef" />
+        <CategoryForm ref="categoryRef" :options="options" />
     </a-modal>
     <a-table :columns="columns" :data-source="dataSource" bordered :pagination="{ pageSize: 7 }" :loading="isLoading">
         <!-- Search -->
@@ -30,8 +30,9 @@
         <template #bodyCell="{ column, text, record }">
             <template v-if="['parent_id'].includes(column.dataIndex)">
                 <div>
-                    <CategoryViewModel v-if="editableData[record.id]" :options="options"
-                        v-model:value="editableData[record.id][column.dataIndex]" @keyup.enter="save(record.id)" />
+                    <CategoryViewModel v-if="editableData[record.id]" :options="options" @select="validateModel(record.id)"
+                        v-model:value="editableData[record.id][column.dataIndex]" @keyup.enter="save(record.id)">
+                    </CategoryViewModel>
                     <template v-else>
                         {{ categoryCombine[text] }}
                     </template>
@@ -68,7 +69,7 @@
 
 <script setup>
 import { cloneDeep } from 'lodash-es';
-import { reactive, ref, onMounted, computed, onBeforeMount } from 'vue';
+import { reactive, ref, computed, onBeforeMount } from 'vue';
 import { SearchOutlined } from '@ant-design/icons-vue';
 import CategoryForm from '@/components/admin/PageWrapper/Categories/CategoryForm.vue';
 import { categoryData } from '@/stores/admin/categories';
@@ -78,6 +79,7 @@ import CategoryViewModel from './CategoryViewModel.vue';
 const store = categoryData();
 const options = ref([]);
 const categoryCombine = ref([]);
+const isErrorModel = ref(false);
 
 const columns = [
     {
@@ -138,21 +140,10 @@ const columns = [
 const isLoading = ref(false);
 const fetchData = async () => {
     await store.getAllCategories(UserData.token);
-    let categories = [];
     if (!store.data.error) {
-        categories = store.data.categories;
-    }
-    dataSource.value = categories;
-}
-
-// fetch data model for select component
-const fetchDataCategoryModel = async () => {
-    await store.getViewModel(UserData.token);
-    let viewModel = [];
-    if (!store.data.error) {
-        viewModel = store.data.category_model
+        dataSource.value = store.data.categories;
         categoryCombine.value = store.data.category_combine
-        options.value = viewModel;
+        options.value = store.data.category_model;
     }
 }
 
@@ -164,8 +155,15 @@ const edit = id => {
     editableData[id] = cloneDeep(dataSource.value.filter(item => id === item.id)[0]);
 };
 
+// validate Grid model
+const validateModel = (id) => {
+    let dataChanged = editableData[id];
+    isErrorModel.value = dataChanged.parent_id === dataChanged.id ? true : false;
+}
+
 const save = id => {
     Object.assign(dataSource.value.filter(item => id === item.id)[0], editableData[id]);
+    console.log(dataSource.value.filter(item => id === item.id)[0]);
     delete editableData[id];
 };
 const cancel = key => {
@@ -240,7 +238,6 @@ const handleOk = () => {
 onBeforeMount(async () => {
     isLoading.value = true;
     await fetchData();
-    await fetchDataCategoryModel();
     isLoading.value = false;
     document.addEventListener('keydown', handleKeyDown);
 });

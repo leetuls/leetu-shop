@@ -1,26 +1,20 @@
 <template>
-    <a-select show-search placeholder="Select a category" style="width: 100%;" :options="options"
-        :filter-option="filterOption" @focus="handleFocus" @blur="handleBlur" @change="handleChange"></a-select>
+        <a-tree-select show-search style="width: 100%" :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+            placeholder="Hãy chọn danh mục cha" allow-clear tree-default-expand-all :tree-data="options"
+            tree-node-filter-prop="label">
+        </a-tree-select>
 </template>
 <script setup>
-import { defineProps } from 'vue';
+import { ref, watch, defineProps } from 'vue';
 
 const props = defineProps(
     {
         'options': Array
     }
 );
+const value = ref();
 
-const handleChange = value => {
-    // console.log(`selected ${value}`);
-};
-const handleBlur = () => {
-    // console.log('blur');
-};
-const handleFocus = () => {
-    // console.log('focus');
-};
-const filterOption = (input, option) => {
-    return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-};
+watch(value, () => {
+    console.log(value.value);
+});
 </script>

@@ -13,7 +13,9 @@ export const categoryData = defineStore('categories',
                         this.data = {
                             'error': false,
                             'status': 200,
-                            'categories': response.data.categories
+                            'categories': response.data.categories,
+                            'category_model': response.data.category_model,
+                            'category_combine': response.data.category_combine
                         };
                     })
                     .catch(error => {
@@ -26,20 +28,20 @@ export const categoryData = defineStore('categories',
             async getViewModel(token) {
                 Api.defaults.headers.Authorization = 'Bearer ' + token;
                 await Api.get('category/view/model')
-                .then(response => {
-                    this.data = {
-                        'error': false,
-                        'status': 200,
-                        'category_model': response.data.category_model,
-                        'category_combine': response.data.category_combine
-                    };
-                })
-                .catch(error => {
-                    console.log(error);
-                    this.data = {
-                        'error': true
-                    };
-                })
+                    .then(response => {
+                        this.data = {
+                            'error': false,
+                            'status': 200,
+                            'category_model': response.data.category_model,
+                            'category_combine': response.data.category_combine
+                        };
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        this.data = {
+                            'error': true
+                        };
+                    })
             }
         }
     });
