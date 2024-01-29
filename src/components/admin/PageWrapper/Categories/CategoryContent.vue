@@ -1,5 +1,6 @@
 <template>
     <a-button class="editable-add-btn" @click="showModal" style="margin-bottom: 8px">Thêm</a-button>
+    <a-alert message="Không thể chọn danh mục cha là chính mình!" type="error" closable v-if="isErrorModel" />
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
         <CategoryForm ref="categoryRef" :options="options" />
     </a-modal>
@@ -161,10 +162,22 @@ const validateModel = (id) => {
     isErrorModel.value = dataChanged.parent_id === dataChanged.id ? true : false;
 }
 
-const save = id => {
-    Object.assign(dataSource.value.filter(item => id === item.id)[0], editableData[id]);
-    console.log(dataSource.value.filter(item => id === item.id)[0]);
-    delete editableData[id];
+const save = async id => {
+    if (!isErrorModel.value) {
+        let categoryOld = dataSource.value.filter(item => id === item.id)[0];
+        isLoading.value = true;
+        await store.updateCategory(
+            UserData.token,
+            {
+                'category_name': editableData[id].name,
+                'parent_id': editableData[id].parent_id
+            },
+            editableData[id].id
+        );
+        Object.assign(categoryOld, editableData[id]);
+        isLoading.value = false;
+        delete editableData[id];
+    }
 };
 const cancel = key => {
     delete editableData[key];

@@ -25,15 +25,13 @@ export const categoryData = defineStore('categories',
                         };
                     })
             },
-            async getViewModel(token) {
+            async updateCategory(token, payload, id) {
                 Api.defaults.headers.Authorization = 'Bearer ' + token;
-                await Api.get('category/view/model')
+                await Api.post('category/edit/' + id, payload)
                     .then(response => {
                         this.data = {
                             'error': false,
-                            'status': 200,
-                            'category_model': response.data.category_model,
-                            'category_combine': response.data.category_combine
+                            'message': response.data.message
                         };
                     })
                     .catch(error => {
