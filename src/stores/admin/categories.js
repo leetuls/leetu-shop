@@ -31,6 +31,7 @@ export const categoryData = defineStore('categories',
                     .then(response => {
                         this.data = {
                             'error': false,
+                            'categories_options': response.data.categories_options,
                             'message': response.data.message
                         };
                     })

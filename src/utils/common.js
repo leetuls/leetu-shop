@@ -22,5 +22,38 @@ export const Common = {
     removeTag: () => {
         $('link:not(.icon)').remove();
         $('script').remove();
+    },
+    isDescendantOf: (parentValue, targetValue, data) => {
+        const stack = [...data];
+
+        while (stack.length > 0) {
+            const currentItem = stack.pop();
+
+            // Nếu current item có giá trị bằng với targetValue và là con của parentValue
+            if (currentItem.value === targetValue && currentItem.children) {
+                const descendants = Common.getAllDescendants(currentItem.children);
+                return descendants.some(descendant => descendant.value === parentValue);
+            }
+
+            // Nếu current item có children, thêm children vào stack
+            if (currentItem.children && currentItem.children.length > 0) {
+                stack.push(...currentItem.children);
+            }
+        }
+
+        // Nếu không tìm thấy
+        return false;
+    },
+    getAllDescendants: (children) => {
+        const descendants = [];
+
+        for (const child of children) {
+            descendants.push(child);
+            if (child.children) {
+                descendants.push(...Common.getAllDescendants(child.children));
+            }
+        }
+
+        return descendants;
     }
 }

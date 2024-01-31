@@ -4,8 +4,8 @@
             <a-form-item label="Tên danh mục" v-bind="validateInfos.name">
                 <a-input v-model:value="modelRef.name" />
             </a-form-item>
-            <a-form-item label="Danh mục cha" v-bind="validateInfos.region">
-                <CategoryViewModel :options="options"/>
+            <a-form-item label="Danh mục cha" v-bind="validateInfos.parent_id">
+                <CategoryViewModel :options="options" v-model:value="modelRef.parent_id"/>
             </a-form-item>
             <a-button style="margin-left: 10px" @click="resetFields">Reset</a-button>
         </a-form>
@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { reactive, toRaw, defineExpose, defineProps } from 'vue';
+import { reactive, toRaw, defineExpose, defineProps, ref } from 'vue';
 import { Form } from 'ant-design-vue';
 import CategoryViewModel from './CategoryViewModel.vue';
 
@@ -31,21 +31,21 @@ const labelCol = {
 const wrapperCol = {
     span: 14,
 };
-const modelRef = reactive({
+const modelRef = ref({
     name: '',
-    region: undefined
+    parent_id: undefined
 });
 const rulesRef = reactive({
     name: [
         {
             required: true,
-            message: 'Please input name',
+            message: 'Hãy chọn tên danh mục',
         },
     ],
-    region: [
+    parent_id: [
         {
             required: true,
-            message: 'Please select region',
+            message: 'Hãy chọn danh mục cha',
         },
     ]
 });
@@ -62,7 +62,13 @@ const onSubmit = () => {
         });
 };
 
+const getDataModel = () => {
+    return modelRef;
+}
+
 defineExpose({
-    onSubmit
+    modelRef,
+    onSubmit,
+    resetFields
 });
 </script>

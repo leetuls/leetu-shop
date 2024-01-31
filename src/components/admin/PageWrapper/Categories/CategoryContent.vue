@@ -1,6 +1,7 @@
 <template>
     <a-button class="editable-add-btn" @click="showModal" style="margin-bottom: 8px">Thêm</a-button>
-    <a-alert message="Không thể chọn danh mục cha là chính mình!" type="error" closable v-if="isErrorModel" />
+    <a-alert :message="messageValidateModel" type="error" closable v-if="messageValidateModel !== ''" />
+    <a-alert :message="messageSuccess" type="success" closable v-if="isEditSuccess" />
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
         <CategoryForm ref="categoryRef" :options="options" />
     </a-modal>
@@ -76,11 +77,14 @@ import CategoryForm from '@/components/admin/PageWrapper/Categories/CategoryForm
 import { categoryData } from '@/stores/admin/categories';
 import UserData from '@/utils/session-data.js';
 import CategoryViewModel from './CategoryViewModel.vue';
+import { Common } from '@/utils/common';
 
 const store = categoryData();
 const options = ref([]);
 const categoryCombine = ref([]);
-const isErrorModel = ref(false);
+const messageValidateModel = ref('');
+const isEditSuccess = ref(false);
+const messageSuccess = ref();
 
 const columns = [
     {
@@ -158,12 +162,21 @@ const edit = id => {
 
 // validate Grid model
 const validateModel = (id) => {
+    messageValidateModel.value = '';
     let dataChanged = editableData[id];
-    isErrorModel.value = dataChanged.parent_id === dataChanged.id ? true : false;
+    if (dataChanged.parent_id === dataChanged.id) {
+        messageValidateModel.value = 'Không thể chọn danh mục cha là chính mình!';
+    } else {
+        let isChild = Common.isDescendantOf(dataChanged.parent_id, dataChanged.id, options.value);
+        if (isChild) {
+            messageValidateModel.value = 'Không thể chọn danh mục con của danh mục hiện tại!';
+        }
+    }
 }
 
 const save = async id => {
-    if (!isErrorModel.value) {
+    isEditSuccess.value = false;
+    if (messageValidateModel.value == '') {
         let categoryOld = dataSource.value.filter(item => id === item.id)[0];
         isLoading.value = true;
         await store.updateCategory(
@@ -174,8 +187,11 @@ const save = async id => {
             },
             editableData[id].id
         );
+        options.value = store.data.categories_options;
         Object.assign(categoryOld, editableData[id]);
         isLoading.value = false;
+        isEditSuccess.value = true;
+        messageSuccess.value = store.data.message;
         delete editableData[id];
     }
 };
@@ -216,18 +232,15 @@ const handleKeyDown = (event) => {
 }
 
 // Add new data
-const count = computed(() => dataSource.value.length + 1);
 const handleAdd = () => {
     const newData = {
-        key: `${count.value}`,
-        name: `Edward King ${count.value}`,
-        age: 32,
-        address: `London, Park Lane no. ${count.value}`,
-    };
+        name: categoryRef.value.modelRef.name,
+        parent_id: categoryRef.value.modelRef.parent_id
+    }
     dataSource.value.push(newData);
 };
 
-// show modal
+// show modal Add
 const modalText = ref('Content of the modal');
 const open = ref(false);
 const confirmLoading = ref(false);
