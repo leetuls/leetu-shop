@@ -41,6 +41,25 @@ export const categoryData = defineStore('categories',
                             'error': true
                         };
                     })
+            },
+            async createCategory(token, payload) {
+                Api.defaults.headers.Authorization = 'Bearer ' + token;
+                await Api.post('category/add', payload)
+                    .then(response => {
+                        this.data = {
+                            'error': false,
+                            'categories': response.data.categories,
+                            'categories_options': response.data.categories_options,
+                            'category_combine': response.data.category_combine,
+                            'message': response.data.message
+                        };
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        this.data = {
+                            'error': true
+                        };
+                    })
             }
         }
     });

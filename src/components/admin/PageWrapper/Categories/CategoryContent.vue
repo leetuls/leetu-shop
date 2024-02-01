@@ -3,7 +3,7 @@
     <a-alert :message="messageValidateModel" type="error" closable v-if="messageValidateModel !== ''" />
     <a-alert :message="messageSuccess" type="success" closable v-if="isEditSuccess" />
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
-        <CategoryForm ref="categoryRef" :options="options" />
+        <CategoryForm ref="categoryRef" :options="options" :messageError="messageAddedFailed" :error="isAddedFailed" />
     </a-modal>
     <a-table :columns="columns" :data-source="dataSource" bordered :pagination="{ pageSize: 7 }" :loading="isLoading">
         <!-- Search -->
@@ -80,11 +80,19 @@ import CategoryViewModel from './CategoryViewModel.vue';
 import { Common } from '@/utils/common';
 
 const store = categoryData();
+
+// tree select model
 const options = ref([]);
 const categoryCombine = ref([]);
 const messageValidateModel = ref('');
+
+//validate edit category
 const isEditSuccess = ref(false);
 const messageSuccess = ref();
+
+// validate add category
+const isAddedFailed = ref(false);
+const messageAddedFailed = ref();
 
 const columns = [
     {
@@ -173,7 +181,7 @@ const validateModel = (id) => {
         }
     }
 }
-
+// save edit category
 const save = async id => {
     isEditSuccess.value = false;
     if (messageValidateModel.value == '') {
@@ -195,6 +203,7 @@ const save = async id => {
         delete editableData[id];
     }
 };
+// cancel edit category
 const cancel = key => {
     delete editableData[key];
 };
@@ -232,16 +241,24 @@ const handleKeyDown = (event) => {
 }
 
 // Add new data
-const handleAdd = () => {
-    const newData = {
+const handleAdd = async () => {
+    let newData = {
         name: categoryRef.value.modelRef.name,
         parent_id: categoryRef.value.modelRef.parent_id
     }
-    dataSource.value.push(newData);
+    await store.createCategory(UserData.token, newData);
+    if (store.data.error === false) {
+        dataSource.value = store.data.categories;
+        options.value = store.data.categories_options;
+        categoryCombine.value = store.data.category_combine;
+        return false;
+    } else {
+        return true;
+    }
+
 };
 
 // show modal Add
-const modalText = ref('Content of the modal');
 const open = ref(false);
 const confirmLoading = ref(false);
 const showModal = () => {
@@ -250,15 +267,24 @@ const showModal = () => {
 
 const categoryRef = ref(null);
 
-const handleOk = () => {
-    categoryRef.value.onSubmit();
-    modalText.value = 'The modal will be closed after two seconds';
+const handleOk = async () => {
+    isAddedFailed.value = false;
+    await categoryRef.value.onSubmit();
     confirmLoading.value = true;
-    setTimeout(() => {
+    if (categoryRef.value.errorAdded.error) {
+        confirmLoading.value = false;
+        return;
+    }
+    let error = await handleAdd();
+    if (error === false) {
         open.value = false;
         confirmLoading.value = false;
-        handleAdd();
-    }, 1200);
+    } else {
+        isAddedFailed.value = true;
+        messageAddedFailed.value = 'Đã xảy ra lỗi hệ thống!';
+        confirmLoading.value = false;
+        return;
+    }
 }
 
 onBeforeMount(async () => {

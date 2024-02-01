@@ -1,11 +1,13 @@
 <template>
     <div>
+        <a-alert :message="messageError" type="error" closable v-if="error" />
+        <br>
         <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
             <a-form-item label="Tên danh mục" v-bind="validateInfos.name">
                 <a-input v-model:value="modelRef.name" />
             </a-form-item>
             <a-form-item label="Danh mục cha" v-bind="validateInfos.parent_id">
-                <CategoryViewModel :options="options" v-model:value="modelRef.parent_id"/>
+                <CategoryViewModel :options="options" v-model:value="modelRef.parent_id" />
             </a-form-item>
             <a-button style="margin-left: 10px" @click="resetFields">Reset</a-button>
         </a-form>
@@ -19,9 +21,13 @@ import CategoryViewModel from './CategoryViewModel.vue';
 
 const useForm = Form.useForm;
 
+const errorAdded = ref();
+
 const props = defineProps(
     {
-        'options': Array
+        'options': Array,
+        'error': Boolean,
+        'messageError': String
     }
 );
 
@@ -39,7 +45,7 @@ const rulesRef = reactive({
     name: [
         {
             required: true,
-            message: 'Hãy chọn tên danh mục',
+            message: 'Hãy nhập tên danh mục',
         },
     ],
     parent_id: [
@@ -52,22 +58,21 @@ const rulesRef = reactive({
 const { resetFields, validate, validateInfos } = useForm(modelRef, rulesRef, {
     onValidate: (...args) => console.log(...args),
 });
-const onSubmit = () => {
-    validate()
+const onSubmit = async () => {
+    await validate()
         .then(() => {
+            errorAdded.value = { 'error': false };
             console.log(toRaw(modelRef));
         })
         .catch(err => {
+            errorAdded.value = { 'error': true };
             console.log('error', err);
         });
 };
 
-const getDataModel = () => {
-    return modelRef;
-}
-
 defineExpose({
     modelRef,
+    errorAdded,
     onSubmit,
     resetFields
 });
