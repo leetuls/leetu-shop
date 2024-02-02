@@ -1,6 +1,7 @@
 <template>
     <a-button class="editable-add-btn" @click="showModal" style="margin-bottom: 8px">Thêm</a-button>
     <a-alert :message="messageValidateModel" type="error" closable v-if="messageValidateModel !== ''" />
+    <a-alert :message="messageDeletedFailed" type="error" closable v-if="isDeletedFailed" />
     <a-alert :message="messageSuccess" type="success" closable v-if="isEditSuccess" />
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
         <CategoryForm ref="categoryRef" :options="options" :messageError="messageAddedFailed" :error="isAddedFailed" />
@@ -93,6 +94,10 @@ const messageSuccess = ref();
 // validate add category
 const isAddedFailed = ref(false);
 const messageAddedFailed = ref();
+
+// validate delete category
+const messageDeletedFailed = ref();
+const isDeletedFailed = ref(false);
 
 const columns = [
     {
@@ -209,8 +214,18 @@ const cancel = key => {
 };
 
 // delete
-const onDelete = key => {
-    dataSource.value = dataSource.value.filter(item => item.key !== key);
+const onDelete = async id => {
+    isDeletedFailed.value = false;
+    messageDeletedFailed.value = '';
+    await store.deletecategory(UserData.token, id);
+    let error = store.data.error;
+    if (!error) {
+        dataSource.value = dataSource.value.filter(item => item.id !== id);
+        options.value = store.data.categories_options;
+    } else {
+        isDeletedFailed.value = true;
+        messageDeletedFailed.value = "Đã xảy ra lỗi hệ thống!";
+    }
 };
 
 // Search

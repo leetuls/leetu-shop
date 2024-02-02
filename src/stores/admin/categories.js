@@ -60,6 +60,23 @@ export const categoryData = defineStore('categories',
                             'error': true
                         };
                     })
+            },
+            async deletecategory(token, id) {
+                Api.defaults.headers.Authorization = 'Bearer ' + token;
+                await Api.delete('category/delete/' + id)
+                    .then(response => {
+                        this.data = {
+                            'error': false,
+                            'categories_options': response.data.categories_options,
+                            'message': response.data.message
+                        };
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        this.data = {
+                            'error': true
+                        };
+                    })
             }
         }
     });
