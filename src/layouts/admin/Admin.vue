@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import TheHeader from '@/components/admin/Common/TheHeader.vue';
 import TheSidebar from '@/components/admin/Common/TheSidebar.vue';
 import { Common } from '@/utils/common.js';
@@ -56,7 +56,7 @@ const addDynamicCssToHead = () => {
         document.body.appendChild(linkElement);
     }
 }
-onMounted(() => {
+onBeforeMount(() => {
     Common.removeTag();
     addDynamicCssToHead();
     document.title = "Shop Admin";

@@ -37,9 +37,9 @@
 
 <script setup>
 import { Common } from '../../utils/common';
-import { onMounted } from 'vue';
+import { onBeforeMount } from 'vue';
 
-onMounted(() => {
+onBeforeMount(() => {
     Common.removeMenuColor();
     Common.changeColorById('loginTag');
 });

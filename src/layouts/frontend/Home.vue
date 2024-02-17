@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onBeforeMount } from "vue";
 import TheHeader from "@/components/frontend/Common/TheHeader.vue";
 import TheFooter from "@/components/frontend/Common/TheFooter.vue";
 
@@ -90,7 +90,7 @@ export default defineComponent({
             }
         };
 
-        onMounted(() => {
+        onBeforeMount(() => {
             addDynamicCssToHead();
         });
 

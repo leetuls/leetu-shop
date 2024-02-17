@@ -2,7 +2,7 @@
     <a-button class="editable-add-btn" @click="showModal" style="margin-bottom: 8px">Thêm</a-button>
     <a-alert :message="messageValidateModel" type="error" closable v-if="messageValidateModel !== ''" />
     <a-alert :message="messageDeletedFailed" type="error" closable v-if="isDeletedFailed" />
-    <a-alert :message="messageSuccess" type="success" closable v-if="isEditSuccess" />
+    <a-alert :message="messageSuccess" type="success" closable v-if="isSuccess" />
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
         <CategoryForm ref="categoryRef" :options="options" :messageError="messageAddedFailed" :error="isAddedFailed" />
     </a-modal>
@@ -88,7 +88,7 @@ const categoryCombine = ref([]);
 const messageValidateModel = ref('');
 
 //validate edit category
-const isEditSuccess = ref(false);
+const isSuccess = ref(false);
 const messageSuccess = ref();
 
 // validate add category
@@ -188,7 +188,7 @@ const validateModel = (id) => {
 }
 // save edit category
 const save = async id => {
-    isEditSuccess.value = false;
+    isSuccess.value = false;
     if (messageValidateModel.value == '') {
         let categoryOld = dataSource.value.filter(item => id === item.id)[0];
         isLoading.value = true;
@@ -203,7 +203,7 @@ const save = async id => {
         options.value = store.data.categories_options;
         Object.assign(categoryOld, editableData[id]);
         isLoading.value = false;
-        isEditSuccess.value = true;
+        isSuccess.value = true;
         messageSuccess.value = store.data.message;
         delete editableData[id];
     }
@@ -222,6 +222,8 @@ const onDelete = async id => {
     if (!error) {
         dataSource.value = dataSource.value.filter(item => item.id !== id);
         options.value = store.data.categories_options;
+        isSuccess.value = true;
+        messageSuccess.value = store.data.message;
     } else {
         isDeletedFailed.value = true;
         messageDeletedFailed.value = "Đã xảy ra lỗi hệ thống!";
@@ -294,6 +296,8 @@ const handleOk = async () => {
     if (error === false) {
         open.value = false;
         confirmLoading.value = false;
+        isSuccess.value = true;
+        messageSuccess.value = store.data.message;
     } else {
         isAddedFailed.value = true;
         messageAddedFailed.value = 'Đã xảy ra lỗi hệ thống!';
