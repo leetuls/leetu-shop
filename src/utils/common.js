@@ -55,5 +55,38 @@ export const Common = {
         }
 
         return descendants;
+    },
+    findDataByName: (person, targetName) => {
+        if (person.name.toString().toLowerCase().includes(targetName.toLowerCase())) {
+            return person;
+        }
+        if (person.children) {
+            for (let child of person.children) {
+                const result = Common.findDataByName(child, targetName);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
+    },
+    findObjectByKey: (array, key) => {
+        for (let i = 0; i < array.length; i++) {
+            const currentItem = array[i];
+
+            if (currentItem.key === key) {
+                return currentItem;
+            }
+
+            if (currentItem.children) {
+                const foundInChildren = Common.findObjectByKey(currentItem.children, key);
+                if (foundInChildren) {
+                    return foundInChildren;
+                }
+            }
+        }
+
+        return null;
     }
 }
