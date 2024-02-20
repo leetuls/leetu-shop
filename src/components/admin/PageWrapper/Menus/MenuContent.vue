@@ -1,10 +1,21 @@
 <template>
-    <a-button class="editable-delete-btn" style="margin-bottom: 8px; float: right;">Xóa</a-button>
-    <a-button class="editable-add-btn" style="margin-bottom: 8px; float: right;">Thêm</a-button>
+    <a-button class="editable-add-btn" style="margin-bottom: 8px; float: right;" @click="showModal">Thêm</a-button>
+    <a-popconfirm title="Xóa các menu đã chọn?" @confirm="removeData">
+        <template #icon><question-circle-outlined style="color: red" /></template>
+        <a-button class="editable-delete-btn" style="margin-bottom: 8px; float: right;">
+            Xóa
+        </a-button>
+    </a-popconfirm>
     <a-space :align="'center'" style="margin-bottom: 16px">
         CheckStrictly:
         <a-switch v-model:checked="rowSelection.checkStrictly"></a-switch>
     </a-space>
+    <div><a-alert message="Hãy chọn ít nhất 1 bản ghi để xóa!" type="error" closable v-if="isSelectedRows"
+            :after-close="handleClose" /></div>
+    <a-modal :width="800" v-model:open="open" title="Thêm menu" :confirm-loading="confirmLoading" @ok="handleOk">
+        <CategoryForm ref="menuRef" :options="options" messageError="" :error="false" labelName="Tên menu"
+            labelParent="Menu cha" />
+    </a-modal>
     <a-table :columns="columns" :data-source="data" :row-selection="rowSelection">
         <!-- Search -->
         <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
@@ -33,16 +44,18 @@
         <template #bodyCell="{ column, text, record }">
             <template v-if="['name'].includes(column.dataIndex)">
                 <div>
-                    <a-input v-if="editableData[record.key]" v-model:value="editableData[record.key][column.dataIndex]" />
+                    <a-input v-if="editableData[record.key]" v-model:value="editableData[record.key][column.dataIndex]"
+                        @keyup.enter="save(record.key)" />
                     <template v-else>
                         {{ text }}
                     </template>
                 </div>
             </template>
-            <template v-if="['age', 'address'].includes(column.dataIndex)">
+            <template v-if="['address'].includes(column.dataIndex)">
                 <div>
-                    <a-input v-if="editableData[record.key]" v-model:value="editableData[record.key][column.dataIndex]"
-                        style="margin-top: 19px;" />
+                    <CategoryViewModel v-if="editableData[record.key]" :options="options" style="margin-top: 18px;"
+                        v-model:value="editableData[record.key][column.dataIndex]" @keyup.enter="save(record.key)">
+                    </CategoryViewModel>
                     <template v-else>
                         {{ text }}
                     </template>
@@ -67,9 +80,11 @@
 </template>
 <script setup>
 import { cloneDeep } from 'lodash-es';
-import { ref, reactive } from 'vue';
-import { SearchOutlined } from '@ant-design/icons-vue';
+import { ref, reactive, onBeforeMount, onMounted } from 'vue';
+import { SearchOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import { Common } from '@/utils/common';
+import CategoryViewModel from '@/components/admin/PageWrapper/Categories/CategoryViewModel.vue';
+import CategoryForm from '@/components/admin/PageWrapper/Categories/CategoryForm.vue';
 
 const columns = [
     {
@@ -87,20 +102,15 @@ const columns = [
         },
     },
     {
-        title: 'Age',
-        dataIndex: 'age',
-        key: 'age',
-        width: '12%',
-    },
-    {
-        title: 'Address',
+        title: 'Danh mục cha',
         dataIndex: 'address',
-        width: '30%',
+        width: '40%',
         key: 'address',
     },
     {
         title: 'Thao tác',
         dataIndex: 'operation',
+        width: '8.4%',
     }
 ];
 const data = [
@@ -167,18 +177,24 @@ const data = [
         address: 'Sidney No. 1 Lake Park',
     },
 ];
+
+// Data Selected
+const selectedData = ref([]);
 const rowSelection = ref({
     checkStrictly: false,
     onChange: (selectedRowKeys, selectedRows) => {
         console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
     },
     onSelect: (record, selected, selectedRows) => {
+        selectedData.value = selectedRows;
         console.log(record, selected, selectedRows);
     },
     onSelectAll: (selected, selectedRows, changeRows) => {
+        selectedData.value = selectedRows;
         console.log(selected, selectedRows, changeRows);
     },
 });
+// End data Selected
 
 // Search
 const state = reactive({
@@ -192,6 +208,7 @@ const handleSearch = (selectedKeys, confirm, dataIndex) => {
     state.searchedColumn = dataIndex;
 };
 const handleReset = clearFilters => {
+    $("tr").css("background-color", "");
     clearFilters({
         confirm: true,
     });
@@ -199,7 +216,11 @@ const handleReset = clearFilters => {
 };
 const searchData = (value, record, dataIndex) => {
     if (record.hasOwnProperty('children')) {
-        return Common.findDataByName(record, value) !== null ? true : false;
+        let foundData = Common.searchByName(record, value);
+        for (let item of foundData) {
+            $("[data-row-key=%s]".replace('%s', item)).css("background-color", "green");
+        }
+        return foundData.length > 0 ? true : false;
     } else {
         return record[dataIndex].toString().toLowerCase().includes(value.toLowerCase());
     }
@@ -230,4 +251,81 @@ const cancel = key => {
     delete editableData[key];
 };
 // End inline data edit
+
+// Check if the pressed button is the ESC key.
+const handleKeyDown = (event) => {
+    if (event.key === 'Escape') {
+        for (let key in editableData) {
+            editableData[key] = null;
+        }
+    }
+}
+onBeforeMount(async () => {
+    document.addEventListener('keydown', handleKeyDown);
+});
+// End check if the pressed button is the ESC key.
+
+// delete
+const isSelectedRows = ref(false);
+const handleClose = () => {
+    isSelectedRows.value = false;
+};
+const removeData = () => {
+    let keys = Common.uniqueKeys(selectedData.value);
+    if (keys.length === 0) {
+        isSelectedRows.value = true;
+    }
+}
+// end delete
+
+// Menus model
+const options = ref([
+    {
+        label: 'root 1',
+        value: 'root 1',
+        children: [
+            {
+                label: 'parent 1',
+                value: 'parent 1',
+                children: [
+                    {
+                        label: 'parent 1-0',
+                        value: 'parent 1-0',
+                        children: [
+                            {
+                                label: 'my leaf',
+                                value: 'leaf1',
+                            },
+                            {
+                                label: 'your leaf',
+                                value: 'leaf2',
+                            },
+                        ],
+                    },
+                    {
+                        label: 'parent 1-1',
+                        value: 'parent 1-1',
+                    },
+                ],
+            },
+            {
+                label: 'parent 2',
+                value: 'parent 2',
+            },
+        ],
+    },
+]);
+// End Menus model
+
+// Modal add new menus
+const menuRef = ref(null);
+const open = ref(false);
+const confirmLoading = ref(false);
+const showModal = () => {
+    open.value = true;
+};
+const handleOk = () => {
+    menuRef.value.onSubmit();
+}
+// End modal add new menus
 </script>

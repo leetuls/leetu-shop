@@ -4,7 +4,8 @@
     <a-alert :message="messageDeletedFailed" type="error" closable v-if="isDeletedFailed" />
     <a-alert :message="messageSuccess" type="success" closable v-if="isSuccess" />
     <a-modal :width="800" v-model:open="open" title="Thêm danh mục" :confirm-loading="confirmLoading" @ok="handleOk">
-        <CategoryForm ref="categoryRef" :options="options" :messageError="messageAddedFailed" :error="isAddedFailed" />
+        <CategoryForm ref="categoryRef" :options="options" :messageError="messageAddedFailed" :error="isAddedFailed"
+            labelName="Tên danh mục" labelParent="Danh mục cha" />
     </a-modal>
     <a-table :columns="columns" :data-source="dataSource" bordered :pagination="{ pageSize: 7 }" :loading="isLoading">
         <!-- Search -->

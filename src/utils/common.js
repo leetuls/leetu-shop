@@ -56,20 +56,22 @@ export const Common = {
 
         return descendants;
     },
-    findDataByName: (person, targetName) => {
-        if (person.name.toString().toLowerCase().includes(targetName.toLowerCase())) {
-            return person;
-        }
-        if (person.children) {
-            for (let child of person.children) {
-                const result = Common.findDataByName(child, targetName);
-                if (result) {
-                    return result;
-                }
+    searchByName: (obj, targetName) => {
+        let result = [];
+
+        function searchRecursive(node) {
+            if (node.name && node.name.toLowerCase().includes(targetName.toLowerCase())) {
+                result.push(node.key);
+            }
+
+            if (node.children && node.children.length > 0) {
+                node.children.forEach(searchRecursive);
             }
         }
 
-        return null;
+        searchRecursive(obj);
+
+        return result;
     },
     findObjectByKey: (array, key) => {
         for (let i = 0; i < array.length; i++) {
@@ -88,5 +90,22 @@ export const Common = {
         }
 
         return null;
+    },
+    uniqueKeys: (inputArray) => {
+        let uniqueKeySet = new Set();
+
+        function processArray(arr) {
+            for (let item of arr) {
+                if (item.hasOwnProperty('key')) {
+                    uniqueKeySet.add(item.key);
+                }
+                if (item.hasOwnProperty('children') && Array.isArray(item.children)) {
+                    processArray(item.children);
+                }
+            }
+        }
+
+        processArray(inputArray);
+        return Array.from(uniqueKeySet);
     }
 }
