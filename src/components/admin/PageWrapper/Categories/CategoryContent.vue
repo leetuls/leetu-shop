@@ -55,12 +55,14 @@
                 <div class="editable-row-operations">
                     <span v-if="editableData[record.id]">
                         <a-popconfirm @confirm="save(record.id)" title="Sure to edit?"><a>Save</a></a-popconfirm>
+                        <span>&nbsp;</span>
                         <a @click="cancel(record.id)">
                             <a>Cancel</a>
                         </a>
                     </span>
                     <span v-else>
                         <a @click="edit(record.id)">Edit</a>
+                        <span>&nbsp;</span>
                         <a-popconfirm v-if="dataSource.length" title="Sure to delete?" @confirm="onDelete(record.id)">
                             <a>Delete</a>
                         </a-popconfirm>

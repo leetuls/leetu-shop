@@ -31,13 +31,14 @@
                             </fieldset>
                         </form>
                     </div>
+                    <div class="loader-shop" v-if="isLoading"></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="vld-parent">
+    <!-- <div class="vld-parent">
         <Loading :active="isLoading" :can-cancel="false" color="#FF9933" />
-    </div>
+    </div> -->
 </template>
 
 <script setup>
@@ -45,8 +46,6 @@ import { onMounted, ref, watch } from 'vue';
 import { Common } from '@/utils/common.js';
 import { useAuthStore } from '@/stores/admin/auth';
 import { useRouter } from 'vue-router';
-import Loading from 'vue3-loading-overlay';
-import 'vue3-loading-overlay/dist/vue3-loading-overlay.css';
 import { useCookies } from "vue3-cookies";
 
 const email = ref(null);
@@ -62,6 +61,7 @@ const { cookies } = useCookies();
 // load dynamic css for admin page
 const addDynamicCssToHead = () => {
     let dynamicCssPath = [
+        '/src/assets/admin/css/loader.css',
         '/src/assets/admin/css/bootstrap.min.css',
         '/src/assets/admin/css/startmin.css'
     ];

@@ -16,7 +16,8 @@
         <CategoryForm ref="menuRef" :options="options" messageError="" :error="false" labelName="Tên menu"
             labelParent="Menu cha" />
     </a-modal>
-    <a-table :columns="columns" :data-source="data" :row-selection="rowSelection">
+    <a-table :columns="columns" :data-source="dataSource" :row-selection="rowSelection" :loading="isLoading"
+        :pagination="{ pageSize: 7 }">
         <!-- Search -->
         <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
             <div style="padding: 8px">
@@ -51,13 +52,13 @@
                     </template>
                 </div>
             </template>
-            <template v-if="['address'].includes(column.dataIndex)">
+            <template v-if="['parent_id'].includes(column.dataIndex)">
                 <div>
-                    <CategoryViewModel v-if="editableData[record.key]" :options="options" style="margin-top: 18px;"
+                    <CategoryViewModel v-if="editableData[record.key]" :options="options" :style="changeStyle()"
                         v-model:value="editableData[record.key][column.dataIndex]" @keyup.enter="save(record.key)">
                     </CategoryViewModel>
                     <template v-else>
-                        {{ text }}
+                        {{ menuCombine[text] }}
                     </template>
                 </div>
             </template>
@@ -80,11 +81,31 @@
 </template>
 <script setup>
 import { cloneDeep } from 'lodash-es';
-import { ref, reactive, onBeforeMount, onMounted } from 'vue';
+import { ref, reactive, onBeforeMount, watch } from 'vue';
 import { SearchOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import { Common } from '@/utils/common';
 import CategoryViewModel from '@/components/admin/PageWrapper/Categories/CategoryViewModel.vue';
 import CategoryForm from '@/components/admin/PageWrapper/Categories/CategoryForm.vue';
+import { menuData } from '@/stores/admin/menus';
+import UserData from '@/utils/session-data.js';
+
+// store data
+const dataSource = ref([]);
+const store = menuData();
+const menuCombine = ref([]);
+// end store data
+
+// fetch Data to Grid
+const isLoading = ref(false);
+const fetchData = async () => {
+    await store.getMenus(UserData.token);
+    if (!store.data.error) {
+        dataSource.value = store.data.menus['tree'];
+        menuCombine.value = store.data.menu_combine
+        options.value = store.data.menu_model;
+    }
+}
+// End fetch Data to Grid
 
 const columns = [
     {
@@ -103,7 +124,7 @@ const columns = [
     },
     {
         title: 'Danh mục cha',
-        dataIndex: 'address',
+        dataIndex: 'parent_id',
         width: '40%',
         key: 'address',
     },
@@ -112,70 +133,6 @@ const columns = [
         dataIndex: 'operation',
         width: '8.4%',
     }
-];
-const data = [
-    {
-        key: 1,
-        name: 'John Brown sr.',
-        age: 60,
-        address: 'New York No. 1 Lake Park',
-        children: [
-            {
-                key: 11,
-                name: 'John Brown',
-                age: 42,
-                address: 'New York No. 2 Lake Park',
-            },
-            {
-                key: 12,
-                name: 'John Brown jr.',
-                age: 30,
-                address: 'New York No. 3 Lake Park',
-                children: [
-                    {
-                        key: 121,
-                        name: 'Jimmy Brown',
-                        age: 16,
-                        address: 'New York No. 3 Lake Park',
-                    },
-                ],
-            },
-            {
-                key: 13,
-                name: 'Jim Green sr.',
-                age: 72,
-                address: 'London No. 1 Lake Park',
-                children: [
-                    {
-                        key: 131,
-                        name: 'Jim Green',
-                        age: 42,
-                        address: 'London No. 2 Lake Park',
-                        children: [
-                            {
-                                key: 1311,
-                                name: 'Jim Green jr.',
-                                age: 25,
-                                address: 'London No. 3 Lake Park',
-                            },
-                            {
-                                key: 1312,
-                                name: 'Jimmy Green sr.',
-                                age: 18,
-                                address: 'London No. 4 Lake Park',
-                            },
-                        ],
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        key: 2,
-        name: 'Joe Black',
-        age: 32,
-        address: 'Sidney No. 1 Lake Park',
-    },
 ];
 
 // Data Selected
@@ -208,7 +165,6 @@ const handleSearch = (selectedKeys, confirm, dataIndex) => {
     state.searchedColumn = dataIndex;
 };
 const handleReset = clearFilters => {
-    $("tr").css("background-color", "");
     clearFilters({
         confirm: true,
     });
@@ -217,9 +173,6 @@ const handleReset = clearFilters => {
 const searchData = (value, record, dataIndex) => {
     if (record.hasOwnProperty('children')) {
         let foundData = Common.searchByName(record, value);
-        for (let item of foundData) {
-            $("[data-row-key=%s]".replace('%s', item)).css("background-color", "green");
-        }
         return foundData.length > 0 ? true : false;
     } else {
         return record[dataIndex].toString().toLowerCase().includes(value.toLowerCase());
@@ -228,7 +181,6 @@ const searchData = (value, record, dataIndex) => {
 // End Search
 
 // inline data edit
-const dataSource = ref(data);
 const editableData = reactive({});
 const edit = key => {
     let dataEdit = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
@@ -261,6 +213,9 @@ const handleKeyDown = (event) => {
     }
 }
 onBeforeMount(async () => {
+    isLoading.value = true;
+    await fetchData();
+    isLoading.value = false;
     document.addEventListener('keydown', handleKeyDown);
 });
 // End check if the pressed button is the ESC key.
@@ -279,42 +234,7 @@ const removeData = () => {
 // end delete
 
 // Menus model
-const options = ref([
-    {
-        label: 'root 1',
-        value: 'root 1',
-        children: [
-            {
-                label: 'parent 1',
-                value: 'parent 1',
-                children: [
-                    {
-                        label: 'parent 1-0',
-                        value: 'parent 1-0',
-                        children: [
-                            {
-                                label: 'my leaf',
-                                value: 'leaf1',
-                            },
-                            {
-                                label: 'your leaf',
-                                value: 'leaf2',
-                            },
-                        ],
-                    },
-                    {
-                        label: 'parent 1-1',
-                        value: 'parent 1-1',
-                    },
-                ],
-            },
-            {
-                label: 'parent 2',
-                value: 'parent 2',
-            },
-        ],
-    },
-]);
+const options = ref([]);
 // End Menus model
 
 // Modal add new menus
@@ -328,4 +248,11 @@ const handleOk = () => {
     menuRef.value.onSubmit();
 }
 // End modal add new menus
+
+// change style
+const changeStyle = () => {
+    return $('.ant-table-row-expand-icon-collapsed').length > 0 ||
+        $('.ant-table-row-expand-icon-expanded').length > 0 ? 'margin-top: 18px' : '';
+}
+// end change style
 </script>
