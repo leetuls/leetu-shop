@@ -16,6 +16,7 @@
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "smart-array-filter": "^4.0.2",
+    "vite-plugin-static-copy": "^1.0.1",
     "vue": "^3.3.11",
     "vue-lodash": "^2.1.2",
     "vue-router": "^4.2.5",

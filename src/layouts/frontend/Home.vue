@@ -14,32 +14,32 @@ export default defineComponent({
     setup() {
         // dynamic data
         const dynamicCssPath = [
-            '/src/assets/frontend/css/bootstrap.min.css',
-            '/src/assets/frontend/css/font-awesome.min.css',
-            '/src/assets/frontend/css/prettyPhoto.css',
-            '/src/assets/frontend/css/price-range.css',
-            '/src/assets/frontend/css/animate.css',
-            '/src/assets/frontend/css/main.css',
-            '/src/assets/frontend/css/responsive.css',
+            '/assets/frontend/css/bootstrap.min.css',
+            '/assets/frontend/css/font-awesome.min.css',
+            '/assets/frontend/css/prettyPhoto.css',
+            '/assets/frontend/css/price-range.css',
+            '/assets/frontend/css/animate.css',
+            '/assets/frontend/css/main.css',
+            '/assets/frontend/css/responsive.css',
         ];
 
-        const shortcutIcon = '/src/assets/frontend/images/ico/favicon.ico';
+        const shortcutIcon = '/assets/frontend/images/ico/favicon.ico';
 
-        const appleTouchIcon144 = '/src/assets/frontend/images/ico/apple-touch-icon-144-precomposed.png';
+        const appleTouchIcon144 = '/assets/frontend/images/ico/apple-touch-icon-144-precomposed.png';
 
-        const appleTouchIcon114 = '/src/assets/frontend/images/ico/apple-touch-icon-114-precomposed.png';
+        const appleTouchIcon114 = '/assets/frontend/images/ico/apple-touch-icon-114-precomposed.png';
 
-        const appleTouchIcon72 = '/src/assets/frontend/images/ico/apple-touch-icon-72-precomposed.png';
+        const appleTouchIcon72 = '/assets/frontend/images/ico/apple-touch-icon-72-precomposed.png';
 
-        const appleTouchIcon = '/src/assets/frontend/images/ico/apple-touch-icon-57-precomposed.png';
+        const appleTouchIcon = '/assets/frontend/images/ico/apple-touch-icon-57-precomposed.png';
 
         const scriptTag = [
-            '/src/assets/frontend/js/jquery.js',
-            '/src/assets/frontend/js/price-range.js',
-            '/src/assets/frontend/js/jquery.scrollUp.min.js',
-            '/src/assets/frontend/js/bootstrap.min.js',
-            '/src/assets/frontend/js/jquery.prettyPhoto.js',
-            '/src/assets/frontend/js/main.js'
+            '/assets/frontend/js/jquery.js',
+            '/assets/frontend/js/price-range.js',
+            '/assets/frontend/js/jquery.scrollUp.min.js',
+            '/assets/frontend/js/bootstrap.min.js',
+            '/assets/frontend/js/jquery.prettyPhoto.js',
+            '/assets/frontend/js/main.js'
         ];
 
         // add dynamic css to head

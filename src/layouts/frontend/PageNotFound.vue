@@ -16,8 +16,8 @@
 import { onMounted } from "vue";
 const addDynamicCssToHead = () => {
     let dynamicCssPath = [
-        '/src/assets/frontend/css/bootstrap.min.css',
-        '/src/assets/frontend/css/main.css',
+        '/assets/frontend/css/bootstrap.min.css',
+        '/assets/frontend/css/main.css',
     ];
     for (let path of dynamicCssPath) {
         let linkElement = document.createElement('link');
@@ -28,7 +28,7 @@ const addDynamicCssToHead = () => {
         document.head.appendChild(linkElement);
     }
 
-    let scriptTag = '/src/assets/frontend/js/main.js';
+    let scriptTag = '/assets/frontend/js/main.js';
     let linkElement1 = document.createElement('script');
     linkElement1.setAttribute('src', scriptTag);
 

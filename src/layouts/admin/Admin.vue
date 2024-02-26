@@ -22,15 +22,15 @@ session.addEventTimeout();
 
 const addDynamicCssToHead = () => {
     let dynamicCssPath = [
-        '/src/assets/admin/css/bootstrap.min.css',
-        '/src/assets/admin/css/startmin.css'
+        '/assets/admin/css/bootstrap.min.css',
+        '/assets/admin/css/startmin.css'
     ];
 
-    let fontAwesome = '/src/assets/admin/css/font-awesome.min.css';
+    let fontAwesome = '/assets/admin/css/font-awesome.min.css';
 
     let scriptTag = [
-        '/src/assets/admin/js/jquery.min.js',
-        '/src/assets/admin/js/bootstrap.min.js'
+        '/assets/admin/js/jquery.min.js',
+        '/assets/admin/js/bootstrap.min.js'
     ];
     for (let path of dynamicCssPath) {
         let linkElement = document.createElement('link');
