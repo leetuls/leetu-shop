@@ -1,4 +1,4 @@
-# LeeTu Shop
+# LeeTu Shop VueJS
 
 Back End Laravel: https://github.com/leetuls/leetu-laravel/tree/feature_leetu_shop
 
