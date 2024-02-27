@@ -22,7 +22,26 @@ export const menuData = defineStore(
                     .catch(error => {
                         console.log(error);
                         this.data = {
-                            'error': true
+                            'error': true,
+                            'message': error.response.data.message
+                        };
+                    })
+            },
+            async deleteMenu(token, payload) {
+                Api.defaults.headers.Authorization = 'Bearer ' + token;
+                await Api.post('menu/destroy', payload)
+                    .then(response => {
+                        this.data = {
+                            'error': false,
+                            'menus_options': response.data.menus_options,
+                            'message': response.data.message
+                        };
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        this.data = {
+                            'error': true,
+                            'message': error.response.data.message
                         };
                     })
             }

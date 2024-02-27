@@ -1,6 +1,10 @@
 <template>
     <a-button class="editable-add-btn" style="margin-bottom: 8px; float: right;" @click="showModal">Thêm</a-button>
-    <a-popconfirm title="Xóa các menu đã chọn?" @confirm="removeData">
+    <a-button class="editable-delete-btn" style="margin-bottom: 8px; float: right;" v-if="selectedData.length == 0"
+        @click="removeData">
+        Xóa
+    </a-button>
+    <a-popconfirm title="Xóa các menu đã chọn?" @confirm="removeData" v-if="selectedData.length > 0">
         <template #icon><question-circle-outlined style="color: red" /></template>
         <a-button class="editable-delete-btn" style="margin-bottom: 8px; float: right;">
             Xóa
@@ -10,8 +14,10 @@
         CheckStrictly:
         <a-switch v-model:checked="rowSelection.checkStrictly"></a-switch>
     </a-space>
-    <div><a-alert message="Hãy chọn ít nhất 1 bản ghi để xóa!" type="error" closable v-if="isSelectedRows"
-            :after-close="handleClose" /></div>
+    <div>
+        <a-alert :message="messageErr" type="error" closable v-if="isSelectedRows" :after-close="handleClose" />
+        <a-alert :message="store.data.message" type="success" closable v-if="isSuccess" :after-close="handleClose" />
+    </div>
     <a-modal :width="800" v-model:open="open" title="Thêm menu" :confirm-loading="confirmLoading" @ok="handleOk">
         <CategoryForm ref="menuRef" :options="options" messageError="" :error="false" labelName="Tên menu"
             labelParent="Menu cha" />
@@ -93,6 +99,8 @@ import UserData from '@/utils/session-data.js';
 const dataSource = ref([]);
 const store = menuData();
 const menuCombine = ref([]);
+const isSuccess = ref(false);
+const messageErr = ref();
 // end store data
 
 // fetch Data to Grid
@@ -224,11 +232,31 @@ onBeforeMount(async () => {
 const isSelectedRows = ref(false);
 const handleClose = () => {
     isSelectedRows.value = false;
+    isSuccess.value = false;
+    messageErr.value = "";
 };
-const removeData = () => {
+const removeData = async () => {
     let keys = Common.uniqueKeys(selectedData.value);
     if (keys.length === 0) {
+        messageErr.value = "Hãy chọn ít nhất 1 bản ghi để xóa!";
         isSelectedRows.value = true;
+    } else {
+        isLoading.value = true;
+        await store.deleteMenu(
+            UserData.token,
+            { "ids": keys }
+        );
+        if (!store.data.error) {
+            isSuccess.value = true;
+            dataSource.value = Common.filterObjectsByKeys(dataSource.value, keys);
+            options.value = store.data.menus_options;
+            selectedData.value = [];
+            isLoading.value = false;
+        } else {
+            messageErr.value = "Đã xảy ra lỗi hệ thống";
+            isSelectedRows.value = true;
+            isLoading.value = false;
+        }
     }
 }
 // end delete
