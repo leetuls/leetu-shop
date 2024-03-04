@@ -25,6 +25,7 @@
     <a-table :columns="columns" :data-source="dataSource" :row-selection="rowSelection" :loading="isLoading"
         :pagination="{ pageSize: 7 }">
         <!-- Search -->
+
         <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
             <div style="padding: 8px">
                 <a-input ref="searchInput" :placeholder="`Search ${column.dataIndex}`" :value="selectedKeys[0]"
@@ -43,6 +44,7 @@
                 </a-button>
             </div>
         </template>
+
         <template #customFilterIcon="{ filtered }">
             <search-outlined :style="{ color: filtered ? '#108ee9' : undefined }" />
         </template>
@@ -58,16 +60,19 @@
                     </template>
                 </div>
             </template>
+
             <template v-if="['parent_id'].includes(column.dataIndex)">
                 <div>
                     <CategoryViewModel v-if="editableData[record.key]" :options="options" :style="changeStyle()"
-                        v-model:value="editableData[record.key][column.dataIndex]" @keyup.enter="save(record.key)">
+                        v-model:value="editableData[record.key][column.dataIndex]" @keyup.enter="save(record.key)"
+                        @select="validateModel(record.id)">
                     </CategoryViewModel>
                     <template v-else>
                         {{ menuCombine[text] }}
                     </template>
                 </div>
             </template>
+
             <template v-if="column.dataIndex === 'operation'">
                 <div class="editable-row-operations">
                     <span v-if="editableData[record.key]">
@@ -85,6 +90,7 @@
         </template>
     </a-table>
 </template>
+
 <script setup>
 import { cloneDeep } from 'lodash-es';
 import { ref, reactive, onBeforeMount, watch } from 'vue';
@@ -135,6 +141,12 @@ const columns = [
         dataIndex: 'parent_id',
         width: '40%',
         key: 'address',
+    },
+    {
+        title: 'No.',
+        dataIndex: 'id',
+        width: '10%',
+        key: 'id',
     },
     {
         title: 'Thao tác',
@@ -189,6 +201,20 @@ const searchData = (value, record, dataIndex) => {
 // End Search
 
 // inline data edit
+const validateModel = (id) => {
+    let dataChanged = editableData[id];
+    if (dataChanged.parent_id === dataChanged.id) {
+        isSelectedRows.value = true;
+        messageErr.value = 'Không thể chọn danh mục cha là chính mình!';
+    } else {
+        let isChild = Common.isDescendantOf(dataChanged.parent_id, dataChanged.id, options.value);
+        if (isChild) {
+            isSelectedRows.value = true;
+            messageErr.value = 'Không thể chọn danh mục con của danh mục hiện tại!';
+        }
+    }
+}
+
 const editableData = reactive({});
 const edit = key => {
     let dataEdit = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
@@ -198,14 +224,32 @@ const edit = key => {
         editableData[key] = Common.findObjectByKey(dataSource.value, key);
     }
 };
-const save = key => {
+const save = async key => {
     let dataSave = dataSource.value.filter(item => key === item.key)[0];
-    if (dataSave) {
-        Object.assign(dataSave, editableData[key]);
-    } else {
-        Object.assign(Common.findObjectByKey(dataSource.value, key), editableData[key]);
+    if (!dataSave) {
+        dataSave = Common.findObjectByKey(dataSource.value, key);
     }
-    delete editableData[key];
+    isLoading.value = true;
+    await store.updateMenu(
+        UserData.token,
+        {
+            'menu_name': editableData[key].name,
+            'parent_id': editableData[key].parent_id
+        },
+        key
+    );
+    if (!store.data.error) {
+        isSuccess.value = true;
+        dataSource.value = store.data.menus['tree'];
+        options.value = store.data.menu_options;
+        Object.assign(dataSave, editableData[key]);
+        delete editableData[key];
+        isLoading.value = false;
+    } else {
+        messageErr.value = "Đã xảy ra lỗi hệ thống";
+        isSelectedRows.value = true;
+        isLoading.value = false;
+    }
 };
 const cancel = key => {
     delete editableData[key];
@@ -272,8 +316,32 @@ const confirmLoading = ref(false);
 const showModal = () => {
     open.value = true;
 };
-const handleOk = () => {
-    menuRef.value.onSubmit();
+const handleOk = async () => {
+    await menuRef.value.onSubmit();
+    confirmLoading.value = true;
+    if (menuRef.value.errorAdded.error) {
+        confirmLoading.value = false;
+        return;
+    }
+    await store.createMenu(
+        UserData.token,
+        {
+            'name': menuRef.value.modelRef.name,
+            'parent_id': menuRef.value.modelRef.parent_id
+        }
+    );
+    if (!store.data.error) {
+        dataSource.value = store.data.menus['tree'];
+        options.value = store.data.menus_options;
+        menuCombine.value = store.data.menu_combine;
+        isSuccess.value = true;
+        confirmLoading.value = false;
+        open.value = false;
+    } else {
+        messageErr.value = "Đã xảy ra lỗi hệ thống";
+        isSelectedRows.value = true;
+        confirmLoading.value = false;
+    }
 }
 // End modal add new menus
 
