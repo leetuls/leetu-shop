@@ -1,6 +1,6 @@
 <template>
     <a-button style="margin-bottom: 8px">Thêm</a-button>
-    <a-table :columns="columns" :data-source="dataSource" bordered>
+    <a-table :columns="columns" :data-source="dataSource" bordered :loading="isLoading">
         <!-- Search -->
         <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
             <div style="padding: 8px">
@@ -27,7 +27,7 @@
         <!-- End Search -->
 
         <template #bodyCell="{ column, text, record }">
-            <template v-if="['name', 'age', 'address'].includes(column.dataIndex)">
+            <template v-if="['product_id', 'name', 'price', 'content', 'category_name'].includes(column.dataIndex)">
                 <div>
                     <a-input v-if="editableData[record.key]" v-model:value="editableData[record.key][column.dataIndex]"
                         @keyup.enter="save(record.key)" style="margin: -5px 0" />
@@ -56,9 +56,9 @@
                 </div>
             </template>
 
-            <template v-if="column.dataIndex === 'image'">
+            <template v-if="column.dataIndex === 'feature_image'">
                 <div>
-                    <ImagePreview :image="record.image" :name="record.name" ref="imageChildrent" />
+                    <ImagePreview :image="record.feature_image" :name="record.name" ref="imageChildrent" />
                 </div>
             </template>
         </template>
@@ -70,19 +70,43 @@ import { cloneDeep } from 'lodash-es';
 import { reactive, ref, onMounted } from 'vue';
 import { SearchOutlined } from '@ant-design/icons-vue';
 import ImagePreview from './ImagePreview.vue';
-import { menuData } from '@/stores/admin/menus';
+import { productData } from '@/stores/admin/products';
 import UserData from '@/utils/session-data.js';
 
 const imageChildrent = ref(null);
-const store = menuData();
+const store = productData();
 
-
+// fetch Data to Grid
+const isLoading = ref(false);
+const fetchData = async () => {
+    await store.getProducts(UserData.token);
+    if (!store.data.error) {
+        dataSource.value = store.data.products;
+    }
+}
+// End fetch Data to Grid
 
 const columns = [
     {
-        title: 'name',
+        title: 'Mã sản phẩm',
+        dataIndex: 'product_id',
+        width: '10%',
+        customFilterDropdown: true,
+        onFilter: (value, record) => record.product_id.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownOpenChange: visible => {
+            if (visible) {
+                setTimeout(() => {
+                    searchInput.value.focus();
+                }, 100);
+            }
+        },
+        sorter: (a, b) => a.product_id.localeCompare(b.product_id),
+        sortDirections: ['descend', 'ascend'],
+    },
+    {
+        title: 'Tên sản phẩm',
         dataIndex: 'name',
-        width: '25%',
+        width: '15%',
         customFilterDropdown: true,
         onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: visible => {
@@ -96,48 +120,34 @@ const columns = [
         sortDirections: ['descend', 'ascend'],
     },
     {
-        title: 'age',
-        dataIndex: 'age',
-        width: '15%',
+        title: 'Giá sản phẩm',
+        dataIndex: 'price',
+        width: '10%',
+        sorter: (a, b) => parseInt(a.price) - parseInt(b.price),
+        sortDirections: ['descend', 'ascend'],
     },
     {
-        title: 'address',
-        dataIndex: 'address',
-        width: '40%',
+        title: 'Mô tả sản phẩm',
+        dataIndex: 'content',
+        width: '30%',
     },
     {
-        title: 'image',
-        dataIndex: 'image',
+        title: 'Danh mục',
+        dataIndex: 'category_name',
     },
     {
-        title: 'operation',
+        title: 'Hình ảnh',
+        dataIndex: 'feature_image',
+        width: '10%'
+    },
+    {
+        title: 'Thao tác',
         dataIndex: 'operation',
     },
 ];
 
-const data = [];
-for (let i = 0; i < 5; i++) {
-    if (i == 4) {
-        data.push({
-            key: i.toString(),
-            name: `Edrward ${i}`,
-            age: 32,
-            address: `London Park no. ${i}`,
-            image: "/src/assets/frontend/images/shop/product11.jpg"
-        });
-    } else {
-        data.push({
-            key: i.toString(),
-            name: `Edrward ${i}`,
-            age: 32,
-            address: `London Park no. ${i}`,
-            image: "/src/assets/frontend/images/shop/product12.jpg"
-        });
-    }
-}
-
 // Inline Edit
-const dataSource = ref(data);
+const dataSource = ref([]);
 const editableData = reactive({});
 
 const edit = key => {
@@ -193,7 +203,10 @@ const handleKeyDown = (event) => {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
+    isLoading.value = true;
+    await fetchData();
+    isLoading.value = false;
     document.addEventListener('keydown', handleKeyDown);
 });
 </script>
