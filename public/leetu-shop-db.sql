@@ -65,6 +65,7 @@ CREATE TABLE `products` (
   `price` int,
   `feature_image` varchar(255),
   `content` text,
+  `branch` varchar(255),
   `user_id` int,
   `category_id` int,
   `created_at` timestamp,
@@ -127,6 +128,12 @@ CREATE TABLE `settings` (
   `update_at` timestamp
 );
 
+CREATE TABLE `order_items_products` (
+  `order_items_product_id` varchar(255),
+  `products_product_id` varchar(255),
+  PRIMARY KEY (`order_items_product_id`, `products_product_id`)
+);
+
 ALTER TABLE `products` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 ALTER TABLE `products` ADD FOREIGN KEY (`product_id`) REFERENCES `product_images` (`product_id`);
@@ -135,16 +142,9 @@ ALTER TABLE `products` ADD FOREIGN KEY (`category_id`) REFERENCES `categories` (
 
 ALTER TABLE `products` ADD FOREIGN KEY (`product_id`) REFERENCES `product_tags` (`product_id`);
 
-CREATE TABLE `order_items_products` (
-  `order_items_product_id` varchar,
-  `products_product_id` varchar,
-  PRIMARY KEY (`order_items_product_id`, `products_product_id`)
-);
-
 ALTER TABLE `order_items_products` ADD FOREIGN KEY (`order_items_product_id`) REFERENCES `order_items` (`product_id`);
 
 ALTER TABLE `order_items_products` ADD FOREIGN KEY (`products_product_id`) REFERENCES `products` (`product_id`);
-
 
 ALTER TABLE `tags` ADD FOREIGN KEY (`id`) REFERENCES `product_tags` (`tag_id`);
 
