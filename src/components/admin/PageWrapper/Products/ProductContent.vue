@@ -27,7 +27,7 @@
         <!-- End Search -->
 
         <template #bodyCell="{ column, text, record }">
-            <template v-if="['product_id', 'name', 'price', 'content', 'category_name'].includes(column.dataIndex)">
+            <template v-if="['name', 'price', 'content', 'category_name'].includes(column.dataIndex)">
                 <div>
                     <a-input v-if="editableData[record.key]" v-model:value="editableData[record.key][column.dataIndex]"
                         @keyup.enter="save(record.key)" style="margin: -5px 0" />
@@ -58,7 +58,15 @@
 
             <template v-if="column.dataIndex === 'feature_image'">
                 <div>
-                    <ImagePreview :image="record.feature_image" :name="record.name" ref="imageChildrent" />
+                    <ImagePreview :images="[record.feature_image]" :name="record.name" ref="imageChildrent" count="1"
+                        :key="record.product_id" />
+                </div>
+            </template>
+
+            <template v-if="column.dataIndex === 'detail_images'">
+                <div>
+                    <ImagePreview :images="record.detail_images === null ? [] : record.detail_images.split('|')"
+                        :name="record.product_id" ref="imageDetail" count="4" :key="record.product_id" />
                 </div>
             </template>
         </template>
@@ -74,6 +82,7 @@ import { productData } from '@/stores/admin/products';
 import UserData from '@/utils/session-data.js';
 
 const imageChildrent = ref(null);
+const imageDetail = ref(null);
 const store = productData();
 
 // fetch Data to Grid
@@ -90,7 +99,7 @@ const columns = [
     {
         title: 'Mã sản phẩm',
         dataIndex: 'product_id',
-        width: '10%',
+        width: '8%',
         customFilterDropdown: true,
         onFilter: (value, record) => record.product_id.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: visible => {
@@ -106,7 +115,7 @@ const columns = [
     {
         title: 'Tên sản phẩm',
         dataIndex: 'name',
-        width: '15%',
+        width: '10%',
         customFilterDropdown: true,
         onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: visible => {
@@ -129,16 +138,27 @@ const columns = [
     {
         title: 'Mô tả sản phẩm',
         dataIndex: 'content',
-        width: '30%',
+        width: '15%',
     },
     {
         title: 'Danh mục',
         dataIndex: 'category_name',
+        width: '10%'
     },
     {
-        title: 'Hình ảnh',
+        title: 'Thẻ sản phẩm',
+        dataIndex: 'tag',
+        width: '15%'
+    },
+    {
+        title: 'Hình ảnh đại diện',
         dataIndex: 'feature_image',
         width: '10%'
+    },
+    {
+        title: 'Hình ảnh chi tiết',
+        dataIndex: 'detail_images',
+        width: '20%'
     },
     {
         title: 'Thao tác',
@@ -155,6 +175,17 @@ const edit = key => {
 };
 const save = async key => {
     let fileObject = imageChildrent.value.fileObj;
+    let fileObjectDetail = imageDetail.value.fileObj;
+    let imagesRemove = imageDetail.value.fileRemove;
+
+    let dataUpdate = {
+        product_images_remove: imagesRemove,
+        product_id: imageDetail.attr('name'),
+        data: {
+            file_feature_img: fileObject,
+            file_detail_imgs: fileObjectDetail
+        }
+    };
 
     if (fileObject) {
         let base64 = await imageChildrent.value.getBase64(fileObject);

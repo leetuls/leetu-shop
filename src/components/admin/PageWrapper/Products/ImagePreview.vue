@@ -1,8 +1,8 @@
 <template>
     <div class="clearfix">
         <a-upload v-model:file-list="fileList" list-type="picture-card" @preview="handlePreview"
-            :beforeUpload="(file) => beforeUpload(file)">
-            <div v-if="fileList.length < 1">
+            @remove="(file) => removeImg(file)" :beforeUpload="(file) => beforeUpload(file)">
+            <div v-if="fileList.length < parseInt(count)">
                 <plus-outlined />
                 <div style="margin-top: 8px">Upload</div>
             </div>
@@ -17,12 +17,14 @@
 import { ref, defineExpose, defineProps } from 'vue';
 import { PlusOutlined } from '@ant-design/icons-vue';
 
-const fileObj = ref();
+const fileObj = ref([]);
+const fileRemove = ref([]);
 
 const props = defineProps(
     {
         name: String,
-        image: String
+        images: Array,
+        count: String
     }
 );
 
@@ -37,14 +39,20 @@ function getBase64(file) {
 const previewVisible = ref(false);
 const previewImage = ref('');
 const previewTitle = ref('');
-const fileList = ref([
-    {
-        uid: '-1',
+const fileList = ref([]);
+props.images.forEach(function (item, index) {
+    let check = item.indexOf('_');
+    let dataImage = item.split('_');
+    let uidImg = check !== -1 ? dataImage[0] : '';
+    let urlImg = check !== -1 ? dataImage[1] : item;
+    fileList.value.push({
+        id_img: uidImg,
+        uid: Date.now() + 'image' + uidImg,
         name: props.name,
         status: 'done',
-        url: props.image,
-    }
-]);
+        url: urlImg,
+    });
+});
 const handleCancel = () => {
     previewVisible.value = false;
     previewTitle.value = '';
@@ -59,11 +67,18 @@ const handlePreview = async file => {
 };
 
 const beforeUpload = file => {
-    fileObj.value = file;
+    fileObj.value.push(file);
     functions.handle_local_before_file_upload(file);
 }
 
-defineExpose({ fileList, fileObj, getBase64 });
+const removeImg = (file) => {
+    fileObj.value = fileObj.value.filter(item => file.uid !== item.uid);
+    if (file.hasOwnProperty('id_img')) {
+        fileRemove.value.push(file.id_img);
+    }
+}
+
+defineExpose({ fileList, fileObj, fileRemove, getBase64 });
 </script>
 
 <style scoped>
