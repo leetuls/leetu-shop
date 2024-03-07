@@ -4,7 +4,7 @@
         <!-- Search -->
         <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
             <div style="padding: 8px">
-                <a-input ref="searchInput" :placeholder="`Search ${column.dataIndex}`" :value="selectedKeys[0]"
+                <a-input ref="searchInput" :placeholder="`${column.title}`" :value="selectedKeys[0]"
                     style="width: 188px; margin-bottom: 8px; display: block"
                     @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
                     @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)" />
@@ -27,29 +27,53 @@
         <!-- End Search -->
 
         <template #bodyCell="{ column, text, record }">
-            <template v-if="['name', 'price', 'content', 'category_name'].includes(column.dataIndex)">
+            <template v-if="['name', 'content', 'category_name'].includes(column.dataIndex)">
                 <div>
-                    <a-input v-if="editableData[record.key]" v-model:value="editableData[record.key][column.dataIndex]"
-                        @keyup.enter="save(record.key)" style="margin: -5px 0" />
+                    <a-input v-if="editableData[record.product_id]"
+                        v-model:value="editableData[record.product_id][column.dataIndex]"
+                        @keyup.enter="save(record.product_id)" style="margin: -5px 0" />
                     <template v-else>
                         {{ text }}
                     </template>
                 </div>
             </template>
 
+            <template v-if="['price'].includes(column.dataIndex)">
+                <div>
+                    <a-input v-if="editableData[record.product_id]"
+                        v-model:value="editableData[record.product_id][column.dataIndex]"
+                        @keyup.enter="save(record.product_id)" style="margin: -5px 0" />
+                    <template v-else>
+                        {{ new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(text) }}
+                    </template>
+                </div>
+            </template>
+
+            <template v-if="['product_tag'].includes(column.dataIndex)">
+                <div>
+                    <ProductTagEdit v-if="editableData[record.product_id]" @keyup.enter="save(record.product_id)"
+                        style="margin: -5px 0"
+                        :options="record.product_tag == null ? [] : record.product_tag.split(';')" />
+                    <ProductTagView v-else :options="record.product_tag == null ? [] : record.product_tag.split(';')"
+                        :key="record.product_id" />
+                </div>
+            </template>
+
             <template v-else-if="column.dataIndex === 'operation'">
                 <div class="editable-row-operations">
-                    <span v-if="editableData[record.key]">
-                        <a-popconfirm @confirm="save(record.key)" title="Sure to edit?"><a>Save</a></a-popconfirm>
+                    <span v-if="editableData[record.product_id]">
+                        <a-popconfirm @confirm="save(record.product_id)"
+                            title="Sure to edit?"><a>Save</a></a-popconfirm>
                         <span>&nbsp;</span>
-                        <a @click="cancel(record.key)">
+                        <a @click="cancel(record.product_id)">
                             <a>Cancel</a>
                         </a>
                     </span>
                     <span v-else>
                         <span>&nbsp;</span>
-                        <a @click="edit(record.key)">Edit</a>
-                        <a-popconfirm v-if="dataSource.length" title="Sure to delete?" @confirm="onDelete(record.key)">
+                        <a @click="edit(record.product_id)">Edit</a>
+                        <a-popconfirm v-if="dataSource.length" title="Sure to delete?"
+                            @confirm="onDelete(record.product_id)">
                             <a>Delete</a>
                         </a-popconfirm>
                     </span>
@@ -65,7 +89,7 @@
 
             <template v-if="column.dataIndex === 'detail_images'">
                 <div>
-                    <ImagePreview :images="record.detail_images === null ? [] : record.detail_images.split('|')"
+                    <ImagePreview :images="record.detail_images === null ? [] : record.detail_images.split(';')"
                         :name="record.product_id" ref="imageDetail" count="4" :key="record.product_id" />
                 </div>
             </template>
@@ -80,6 +104,9 @@ import { SearchOutlined } from '@ant-design/icons-vue';
 import ImagePreview from './ImagePreview.vue';
 import { productData } from '@/stores/admin/products';
 import UserData from '@/utils/session-data.js';
+import ProductTagView from './ProductTagView.vue';
+import ProductTagEdit from './ProductTagEdit.vue';
+
 
 const imageChildrent = ref(null);
 const imageDetail = ref(null);
@@ -143,11 +170,20 @@ const columns = [
     {
         title: 'Danh mục',
         dataIndex: 'category_name',
-        width: '10%'
+        customFilterDropdown: true,
+        onFilter: (value, record) => record.category_name.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownOpenChange: visible => {
+            if (visible) {
+                setTimeout(() => {
+                    searchInput.value.focus();
+                }, 100);
+            }
+        },
+        width: '14%'
     },
     {
         title: 'Thẻ sản phẩm',
-        dataIndex: 'tag',
+        dataIndex: 'product_tag',
         width: '15%'
     },
     {
@@ -171,7 +207,7 @@ const dataSource = ref([]);
 const editableData = reactive({});
 
 const edit = key => {
-    editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
+    editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.product_id)[0]);
 };
 const save = async key => {
     let fileObject = imageChildrent.value.fileObj;
@@ -180,20 +216,20 @@ const save = async key => {
 
     let dataUpdate = {
         product_images_remove: imagesRemove,
-        product_id: imageDetail.attr('name'),
+        product_id: imageDetail.value.productId,
         data: {
             file_feature_img: fileObject,
             file_detail_imgs: fileObjectDetail
         }
     };
 
-    if (fileObject) {
-        let base64 = await imageChildrent.value.getBase64(fileObject);
+    // if (fileObject) {
+    //     let base64 = await imageChildrent.value.getBase64(fileObject);
 
-        await store.createMenu(UserData.token, { 'file': base64 });
-    }
+    //     await store.createMenu(UserData.token, { 'file': base64 });
+    // }
 
-    Object.assign(dataSource.value.filter(item => key === item.key)[0], editableData[key]);
+    Object.assign(dataSource.value.filter(item => key === item.product_id)[0], editableData[key]);
     delete editableData[key];
 };
 // End Inline edit
@@ -203,7 +239,7 @@ const cancel = key => {
 };
 
 const onDelete = key => {
-    dataSource.value = dataSource.value.filter(item => item.key !== key);
+    dataSource.value = dataSource.value.filter(item => item.product_id !== key);
 };
 
 // search

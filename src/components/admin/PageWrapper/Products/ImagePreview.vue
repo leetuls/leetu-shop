@@ -14,11 +14,12 @@
 </template>
 
 <script setup>
-import { ref, defineExpose, defineProps } from 'vue';
+import { ref, defineExpose, defineProps, onMounted } from 'vue';
 import { PlusOutlined } from '@ant-design/icons-vue';
 
 const fileObj = ref([]);
 const fileRemove = ref([]);
+const productId = ref();
 
 const props = defineProps(
     {
@@ -78,7 +79,11 @@ const removeImg = (file) => {
     }
 }
 
-defineExpose({ fileList, fileObj, fileRemove, getBase64 });
+onMounted(() => {
+    productId.value = props.name;
+});
+
+defineExpose({ productId, fileList, fileObj, fileRemove, getBase64 });
 </script>
 
 <style scoped>

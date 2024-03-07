@@ -14,7 +14,8 @@ import {
     TreeSelect,
     Switch,
     Space,
-    Upload
+    Upload,
+    Tag
 } from 'ant-design-vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedState from "pinia-plugin-persistedstate"
@@ -39,6 +40,7 @@ app.use(Form);
 app.use(TreeSelect);
 app.use(Switch);
 app.use(Space);
-app.use(Upload)
+app.use(Upload);
+app.use(Tag);
 
 app.mount('#app');
