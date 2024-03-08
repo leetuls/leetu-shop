@@ -27,13 +27,29 @@
         <!-- End Search -->
 
         <template #bodyCell="{ column, text, record }">
-            <template v-if="['name', 'content', 'category_name'].includes(column.dataIndex)">
+            <template v-if="['name', 'content'].includes(column.dataIndex)">
                 <div>
                     <a-input v-if="editableData[record.product_id]"
                         v-model:value="editableData[record.product_id][column.dataIndex]"
                         @keyup.enter="save(record.product_id)" style="margin: -5px 0" />
                     <template v-else>
                         {{ text }}
+                    </template>
+                </div>
+            </template>
+
+            <template v-if="['category_id'].includes(column.dataIndex)">
+                <div>
+                    <span
+                        v-if="editableData[record.product_id] && editableData[record.product_id][column.dataIndex] === undefined"
+                        style="color: red;" id="record.product_id">Hãy chọn hạng mục này!</span>
+                    <CategoryViewModel v-if="editableData[record.product_id]" :options="categoryOptions"
+                        placeholder="Hãy chọn danh mục"
+                        v-model:value="editableData[record.product_id][column.dataIndex]"
+                        @keyup.enter="save(record.product_id)">
+                    </CategoryViewModel>
+                    <template v-else>
+                        {{ categoryCombine[text] }}
                     </template>
                 </div>
             </template>
@@ -52,7 +68,7 @@
             <template v-if="['product_tag'].includes(column.dataIndex)">
                 <div>
                     <ProductTagEdit v-if="editableData[record.product_id]" @keyup.enter="save(record.product_id)"
-                        style="margin: -5px 0"
+                        style="margin: -5px 0" ref="tagEdit"
                         :options="record.product_tag == null ? [] : record.product_tag.split(';')" />
                     <ProductTagView v-else :options="record.product_tag == null ? [] : record.product_tag.split(';')"
                         :key="record.product_id" />
@@ -103,21 +119,31 @@ import { reactive, ref, onMounted } from 'vue';
 import { SearchOutlined } from '@ant-design/icons-vue';
 import ImagePreview from './ImagePreview.vue';
 import { productData } from '@/stores/admin/products';
+import { categoryData } from '@/stores/admin/categories';
 import UserData from '@/utils/session-data.js';
 import ProductTagView from './ProductTagView.vue';
 import ProductTagEdit from './ProductTagEdit.vue';
+import CategoryViewModel from '@/components/admin/PageWrapper/Categories/CategoryViewModel.vue';
 
 
 const imageChildrent = ref(null);
 const imageDetail = ref(null);
-const store = productData();
+const productStore = productData();
+const categoryStore = categoryData();
+const tagEdit = ref(null);
+const isError = ref();
 
 // fetch Data to Grid
+const categoryOptions = ref([]);
+const categoryCombine = ref([]);
 const isLoading = ref(false);
 const fetchData = async () => {
-    await store.getProducts(UserData.token);
-    if (!store.data.error) {
-        dataSource.value = store.data.products;
+    await productStore.getProducts(UserData.token);
+    await categoryStore.getAllCategories(UserData.token);
+    if (!productStore.data.error && !categoryStore.data.error) {
+        dataSource.value = productStore.data.products;
+        categoryOptions.value = categoryStore.data.category_model;
+        categoryCombine.value = categoryStore.data.category_combine;
     }
 }
 // End fetch Data to Grid
@@ -169,9 +195,9 @@ const columns = [
     },
     {
         title: 'Danh mục',
-        dataIndex: 'category_name',
+        dataIndex: 'category_id',
         customFilterDropdown: true,
-        onFilter: (value, record) => record.category_name.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilter: (value, record) => record.category_id.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: visible => {
             if (visible) {
                 setTimeout(() => {
@@ -210,18 +236,45 @@ const edit = key => {
     editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.product_id)[0]);
 };
 const save = async key => {
+    // feature_image
     let fileObject = imageChildrent.value.fileObj;
+
+    //detail_images
     let fileObjectDetail = imageDetail.value.fileObj;
     let imagesRemove = imageDetail.value.fileRemove;
 
+    // tags
+    let modelTag = tagEdit.value.value;
+    let defaultValueTag = tagEdit.value.defaultValue;
+    let removeTags = tagEdit.value.dataRemove;
+    let tagsNew = modelTag.filter(item => !defaultValueTag.includes(item));
+
+    editableData[key].product_tag = modelTag.join(';');
+
     let dataUpdate = {
-        product_images_remove: imagesRemove,
-        product_id: imageDetail.value.productId,
-        data: {
-            file_feature_img: fileObject,
-            file_detail_imgs: fileObjectDetail
+        products: {
+            product_id: imageDetail.value.productId,
+            name: editableData[key].name,
+            price: editableData[key].price,
+            content: editableData[key].content,
+            category_id: editableData[key].category_id,
+            feature_image: fileObject
+        },
+        product_images: {
+            images_remove: imagesRemove,
+            images_new: fileObjectDetail
+        },
+        product_tags: {
+            tags_remove: removeTags,
+            tags_new: tagsNew
         }
     };
+
+    // validate category
+    if (dataUpdate.products.category_id === undefined) {
+        isError.value = true;
+        return;
+    }
 
     // if (fileObject) {
     //     let base64 = await imageChildrent.value.getBase64(fileObject);
