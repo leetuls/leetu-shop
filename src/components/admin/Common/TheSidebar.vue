@@ -24,7 +24,7 @@
                     <RouterLink to="/admin/menu-list"><i class="fa fa-align-justify fa-fw"></i> Menus</RouterLink>
                 </li>
                 <li>
-                    <RouterLink to="/admin/product-list"><i class="fa fa-align-justify fa-fw"></i> Sản phẩm</RouterLink>
+                    <RouterLink to="/admin/product-list"><i class="fa fa-product-hunt fa-fw"></i> Sản phẩm</RouterLink>
                 </li>
             </ul>
         </div>
