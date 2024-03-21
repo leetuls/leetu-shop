@@ -238,9 +238,16 @@ const edit = key => {
 const save = async key => {
     // feature_image
     let fileObject = imageChildrent.value.fileObj;
+    let base64FeatureImage = fileObject.length > 0 ? await imageChildrent.value.getBase64(fileObject[0]) : '';
 
     //detail_images
+    let base64DetailImages = [];
     let fileObjectDetail = imageDetail.value.fileObj;
+    for (let i = 0; i < fileObjectDetail.length; i++) {
+        let base64Data = await imageChildrent.value.getBase64(fileObjectDetail[i]);
+        base64DetailImages.push(base64Data);
+    }
+
     let imagesRemove = imageDetail.value.fileRemove;
 
     // tags
@@ -258,11 +265,12 @@ const save = async key => {
             price: editableData[key].price,
             content: editableData[key].content,
             category_id: editableData[key].category_id,
-            feature_image: fileObject
+            feature_image: base64FeatureImage,
+            user_id: UserData.user_id
         },
         product_images: {
             images_remove: imagesRemove,
-            images_new: fileObjectDetail
+            images_new: base64DetailImages
         },
         product_tags: {
             tags_remove: removeTags,
@@ -275,12 +283,6 @@ const save = async key => {
         isError.value = true;
         return;
     }
-
-    // if (fileObject) {
-    //     let base64 = await imageChildrent.value.getBase64(fileObject);
-
-    //     await store.createMenu(UserData.token, { 'file': base64 });
-    // }
 
     Object.assign(dataSource.value.filter(item => key === item.product_id)[0], editableData[key]);
     delete editableData[key];
