@@ -1,7 +1,7 @@
 <template>
     <a-button style="margin-bottom: 8px">Thêm</a-button>
     <a-table :columns="columns" :data-source="dataSource" bordered :loading="isLoading"
-        :scroll="{ x: 1800, y: getInnerHeight() - (46 / 100) * getInnerHeight() }"
+        :scroll="{ x: 1800, y: getInnerHeight() - 325 }"
         :pagination="{ position: ['topRight'] }">
         <!-- Search -->
         <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
