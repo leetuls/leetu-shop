@@ -7,4 +7,6 @@ Back End Laravel: https://github.com/leetuls/leetu-laravel/tree/feature_leetu_sh
 store front: https://master.d66jn4ue2xk7a.amplifyapp.com/
 
 admin: https://master.d66jn4ue2xk7a.amplifyapp.com/admin
+       email: test_admin@gmail.com
+       password: 123456
 
