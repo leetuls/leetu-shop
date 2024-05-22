@@ -19,6 +19,7 @@ admin: https://master.d66jn4ue2xk7a.amplifyapp.com/admin
        2.2) save file name_key.pem on local
        2.3) ssh to instance on windown or linux: ssh -i "path_to_key_pairs" <username>@<public_ip_or_public_dns>
 3) install tool (trường hợp không dùng docker)
+   
        3.1) clone source BE from https://github.com/leetuls/leetu-laravel/tree/feature_leetu_shop to /var/www/html on instance
    
        3.2) install nginx, mysql server, composer
